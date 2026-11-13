@@ -329,13 +329,13 @@ footer { text-align: center; padding: 30px 20px 56px; }
 @keyframes coupleIn { from { transform: translateY(22px); opacity: 0; } to { transform: none; opacity: 1; } }
 .couple-breathe { transform-origin: 200px 592px; animation: coupleBreathe 4.8s ease-in-out 4.8s infinite; }
 @keyframes coupleBreathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.004, 1.01); } }
-.veil-sway { transform-origin: 205px 410px; animation: veilSway 4.2s ease-in-out 4.8s infinite; }
+.veil-sway { transform-origin: 236px 424px; animation: veilSway 4.2s ease-in-out 4.8s infinite; }
 @keyframes veilSway { 0%, 100% { transform: skewX(0) rotate(0); } 33% { transform: skewX(2.4deg) rotate(1deg); } 66% { transform: skewX(-1.6deg) rotate(-.8deg); } }
-.groom-head { transform-origin: 178px 424px; animation: nod 6s ease-in-out 5s infinite; }
+.groom-head { transform-origin: 196px 426px; animation: nod 6s ease-in-out 5s infinite; }
 @keyframes nod { 0%, 100% { transform: rotate(0); } 40% { transform: rotate(2deg); } 70% { transform: rotate(-1deg); } }
-.bride-head { transform-origin: 214px 438px; animation: lean 6.5s ease-in-out 5s infinite; }
+.bride-head { transform-origin: 232px 452px; animation: lean 6.5s ease-in-out 5s infinite; }
 @keyframes lean { 0%, 100% { transform: rotate(0); } 45% { transform: rotate(-3.5deg); } }
-.skirt-sway { transform-origin: 240px 468px; animation: skirt 4.6s ease-in-out 4.8s infinite; }
+.skirt-sway { transform-origin: 236px 488px; animation: skirt 4.6s ease-in-out 4.8s infinite; }
 @keyframes skirt { 0%, 100% { transform: skewX(0); } 50% { transform: skewX(1.2deg); } }
 
 /* petals flutter down, hearts float up */
