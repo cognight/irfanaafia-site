@@ -2,7 +2,7 @@
 // (If you change the time, also update walima.ics so the "Apple or Outlook" calendar file matches.)
 window.SITE = {
   // The address of the Google script that stores RSVPs. Leave empty to preview with sample guests.
-  apiUrl: "",
+  apiUrl: "https://script.google.com/macros/s/AKfycbyXSqae16rSS_ZKvuMKq4abf167Y7DLk82A0rK61g81n2JDaiRGOLXYy25HRLfk_I58TA/exec",
 
   deadlineText: "Sunday, December 13, 2026",
 
