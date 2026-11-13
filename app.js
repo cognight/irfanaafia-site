@@ -274,3 +274,12 @@
 
   start();
 })();
+
+// Pause the endless motion in the artwork while it is scrolled out of view (saves battery).
+(function () {
+  var frame = document.querySelector(".frame");
+  if (!frame || !("IntersectionObserver" in window)) return;
+  new IntersectionObserver(function (entries) {
+    frame.classList.toggle("is-offscreen", !entries[0].isIntersecting);
+  }).observe(frame);
+})();

@@ -33,7 +33,8 @@ body {
   margin: 0 auto;
   aspect-ratio: 400 / 620;
   container-type: inline-size;
-  filter: drop-shadow(0 10px 24px rgba(168, 64, 95, .18));
+  border-radius: 26px;
+  box-shadow: 0 10px 24px rgba(168, 64, 95, .2);
 }
 .frame .art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
@@ -270,4 +271,108 @@ footer { text-align: center; padding: 30px 20px 56px; }
 @media (prefers-reduced-motion: no-preference) {
   .card { animation: rise .35s ease-out; }
   @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+}
+
+/* ---------- animated invitation artwork ---------- */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes shadowIn { from { opacity: 0; } to { opacity: .14; } }
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes grow { from { transform: scale(0); } to { transform: none; } }
+
+.bg-in { animation: fadeIn .7s ease-out both; }
+.arch-fill { animation: fadeIn .9s ease-out .85s both; }
+.arch-line, .arch-line2 { stroke-dasharray: 1; stroke-dashoffset: 0; }
+.arch-line { animation: draw 1.3s cubic-bezier(.5, 0, .2, 1) .2s both; }
+.arch-line2 { animation: draw 1.3s cubic-bezier(.5, 0, .2, 1) .55s both; }
+
+/* a soft band of light that passes over the arch now and then */
+.sheen-move { animation: sheen 9s ease-in-out 6s infinite; }
+@keyframes sheen { 0% { transform: translateX(0); } 40%, 100% { transform: translateX(580px); } }
+
+/* chandelier lowers on its chain, then sways gently */
+.chan-drop { animation: chanDrop 1.4s cubic-bezier(.22, 1.3, .5, 1) 1s both; }
+@keyframes chanDrop { from { transform: translateY(-190px); } to { transform: none; } }
+.chan-sway { transform-origin: 0 0; animation: chanSway 7s ease-in-out 2.4s infinite; }
+@keyframes chanSway { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(1.8deg); } 75% { transform: rotate(-1.8deg); } }
+
+/* candles light one by one, then flicker */
+.flame { transform-box: fill-box; transform-origin: 50% 100%;
+  animation: flameIn .5s ease-out var(--d) both, flicker var(--f) ease-in-out calc(var(--d) + .5s) infinite; }
+@keyframes flameIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes flicker {
+  0%, 100% { transform: scale(1, 1) skewX(0); }
+  18% { transform: scale(.9, 1.14) skewX(-4deg); }
+  42% { transform: scale(1.07, .9) skewX(3deg); }
+  68% { transform: scale(.95, 1.1) skewX(-2deg); }
+}
+.glow { animation: fadeIn .9s ease-out var(--d) both; }
+
+.spark { transform-box: fill-box; transform-origin: center; opacity: 0; animation: spark 3.6s ease-in-out var(--d) infinite; }
+@keyframes spark {
+  0% { transform: scale(0) rotate(0); opacity: 0; }
+  35% { transform: scale(1) rotate(45deg); opacity: 1; }
+  70% { transform: scale(0) rotate(90deg); opacity: 0; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+/* flowers grow in, then each corner sways gently */
+.leaf-grow { transform-origin: 0 0; animation: grow .9s cubic-bezier(.2, .9, .3, 1.25) var(--d) both; }
+.bloom { transform-origin: 0 0; animation: bloom 1.1s cubic-bezier(.2, .9, .3, 1.1) var(--d) both; }
+@keyframes bloom { 0% { transform: scale(0) rotate(-70deg); opacity: 0; } 55% { opacity: 1; } 100% { transform: none; opacity: 1; } }
+.pop { transform-origin: 0 0; animation: grow .6s cubic-bezier(.2, 1.6, .4, 1) var(--d) both; }
+.corner-sway { transform-origin: 0 0; animation: cornerSway var(--sd) ease-in-out var(--sdel) infinite; }
+@keyframes cornerSway { 0%, 100% { transform: rotate(-1.3deg) scale(1); } 50% { transform: rotate(1.3deg) scale(1.02); } }
+
+/* the couple arrives and comes to life */
+.shadow-in { animation: shadowIn 1.2s ease-out 3.6s both; }
+.couple-in { animation: coupleIn 1.2s cubic-bezier(.2, .8, .3, 1) 3.6s both; }
+@keyframes coupleIn { from { transform: translateY(22px); opacity: 0; } to { transform: none; opacity: 1; } }
+.couple-breathe { transform-origin: 200px 592px; animation: coupleBreathe 4.8s ease-in-out 4.8s infinite; }
+@keyframes coupleBreathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.004, 1.01); } }
+.veil-sway { transform-origin: 205px 410px; animation: veilSway 4.2s ease-in-out 4.8s infinite; }
+@keyframes veilSway { 0%, 100% { transform: skewX(0) rotate(0); } 33% { transform: skewX(2.4deg) rotate(1deg); } 66% { transform: skewX(-1.6deg) rotate(-.8deg); } }
+.groom-head { transform-origin: 178px 424px; animation: nod 6s ease-in-out 5s infinite; }
+@keyframes nod { 0%, 100% { transform: rotate(0); } 40% { transform: rotate(2deg); } 70% { transform: rotate(-1deg); } }
+.bride-head { transform-origin: 214px 438px; animation: lean 6.5s ease-in-out 5s infinite; }
+@keyframes lean { 0%, 100% { transform: rotate(0); } 45% { transform: rotate(-3.5deg); } }
+.skirt-sway { transform-origin: 240px 468px; animation: skirt 4.6s ease-in-out 4.8s infinite; }
+@keyframes skirt { 0%, 100% { transform: skewX(0); } 50% { transform: skewX(1.2deg); } }
+
+/* petals flutter down, hearts float up */
+.petal { animation: petalFall var(--t) ease-in-out var(--d) infinite both; }
+@keyframes petalFall {
+  0% { transform: translate(calc(var(--amp) * -1), -24px) rotate(-40deg); opacity: 0; }
+  6% { opacity: 1; }
+  16% { transform: translate(var(--amp), 70px) rotate(50deg); }
+  33% { transform: translate(calc(var(--amp) * -.8), 220px) rotate(-30deg); }
+  50% { transform: translate(var(--amp), 350px) rotate(60deg); }
+  66% { transform: translate(calc(var(--amp) * -1), 460px) rotate(-40deg); }
+  83% { transform: translate(calc(var(--amp) * .8), 560px) rotate(40deg); opacity: 1; }
+  100% { transform: translate(calc(var(--amp) * -.6), 650px) rotate(-20deg); opacity: 0; }
+}
+.heart { animation: floatUp var(--t) ease-out var(--d) infinite both; }
+@keyframes floatUp {
+  0% { transform: translate(0, 0) scale(.3); opacity: 0; }
+  15% { transform: translate(calc(var(--dx) * .2), -14px) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), -130px) scale(.9); opacity: 0; }
+}
+
+/* the words appear in turn */
+.eyebrow { animation: fadeUp .9s ease-out 2.2s both; }
+.names { animation: wipe 2.1s cubic-bezier(.4, 0, .2, 1) 2.5s both; }
+.lead { animation: fadeUp .8s ease-out 4.3s both; }
+.occasion { animation: textPop 1s cubic-bezier(.2, .9, .3, 1.2) 4.6s both; }
+.when { animation: fadeUp .8s ease-out 5.1s both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes wipe { from { clip-path: inset(-20% 100% -20% -8%); } to { clip-path: inset(-20% -8% -20% -8%); } }
+@keyframes textPop { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+
+/* save battery: stop the endless motion while the artwork is off screen */
+.frame.is-offscreen *, .frame.is-offscreen { animation-play-state: paused !important; }
+
+/* people who ask their phone for less motion get the finished picture, standing still */
+@media (prefers-reduced-motion: reduce) {
+  .frame *, .frame .text * { animation: none !important; }
+  .eyebrow, .names, .lead, .occasion, .when { animation: none !important; }
+  .petal, .heart, .spark, .sheen-move { display: none; }
 }
