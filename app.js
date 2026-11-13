@@ -1,0 +1,276 @@
+(function () {
+  "use strict";
+
+  var CFG = window.SITE;
+  var $ = function (id) { return document.getElementById(id); };
+  var VIEWS = ["loading", "lost", "form", "done", "closed"];
+
+  var code = "";        // the personal code from the guest's link
+  var household = null; // { display, max, events: [eventId] }
+  var saved = null;     // the guest's saved reply, if any: { answers, message }
+  var open = true;      // false once the RSVP deadline has passed
+  var answers = {};     // draft answers while filling in the form
+
+  // ---------- talking to the Google script (or sample data while previewing) ----------
+
+  function api(action, payload) {
+    if (!CFG.apiUrl) return demoApi(action, payload);
+    var body = JSON.stringify(Object.assign({ action: action }, payload));
+    // No Content-Type header on purpose: it keeps this a "simple" request that Google accepts from any page.
+    return fetch(CFG.apiUrl, { method: "POST", body: body }).then(function (r) {
+      if (!r.ok) throw new Error("bad status");
+      return r.json();
+    });
+  }
+
+  // Sample guests, only used while apiUrl is empty (preview).
+  var DEMO = {
+    RAHMAN: { display: "The Rahman Family", max: 5, events: ["walima"] },
+    SIDDIQ: { display: "The Siddiqui Family", max: 2, events: ["walima"] },
+    AYESHA: { display: "Ayesha Malik", max: 1, events: ["walima"] },
+    CHAUDH: { display: "The Chaudhry Family", max: 12, events: ["walima"] }
+  };
+  var DEADLINE = Date.parse("2026-12-14T05:00:00Z"); // end of Dec 13 in Toronto
+
+  function demoStore() { try { return JSON.parse(localStorage.getItem("demoReplies") || "{}"); } catch (e) { return {}; } }
+
+  function demoApi(action, p) {
+    return new Promise(function (resolve) {
+      setTimeout(function () {
+        var store = demoStore(), h = DEMO[p.code];
+        if (!h) { resolve({ ok: false, error: "unknown" }); return; }
+        if (action === "get") {
+          resolve({ ok: true, household: h, response: store[p.code] || null, open: Date.now() < DEADLINE });
+        } else if (action === "submit") {
+          store[p.code] = { answers: p.answers, message: p.message || "" };
+          localStorage.setItem("demoReplies", JSON.stringify(store));
+          resolve({ ok: true, response: store[p.code] });
+        }
+      }, 450);
+    });
+  }
+
+  // ---------- small helpers ----------
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function eventById(id) { return CFG.events.filter(function (e) { return e.id === id; })[0]; }
+
+  var firstShow = true;
+  function show(name) {
+    VIEWS.forEach(function (v) { $("view-" + v).hidden = v !== name; });
+    if (firstShow) { firstShow = false; return; } // the first screen opens at the top, under the invitation art
+    var card = $("view-" + name), h = card.querySelector("h2");
+    window.scrollTo({ top: Math.max(card.offsetTop - 16, 0), behavior: "smooth" });
+    if (h) { h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); }
+  }
+
+  function showError(id, text) {
+    var p = $(id);
+    if (!text) { p.hidden = true; return; }
+    p.textContent = text;
+    p.hidden = false;
+  }
+
+  function busy(btn, on, label) {
+    btn.disabled = on;
+    if (label) btn.textContent = label;
+  }
+
+  var NETWORK_MSG = "We could not reach the server. Please check your internet connection and try again.";
+
+  function googleCalUrl(ev) {
+    return "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+      "&text=" + encodeURIComponent(ev.calendarTitle) +
+      "&dates=" + ev.startUTC + "/" + ev.endUTC +
+      "&ctz=America%2FToronto" +
+      "&location=" + encodeURIComponent(ev.venue + ", " + ev.address);
+  }
+
+  function eventCard(ev) {
+    var card = el("div", "event");
+    card.appendChild(el("h3", null, ev.name));
+    card.appendChild(el("p", "when-line", ev.dateText + " at " + ev.timeText));
+    var where = el("p", "where", ev.venue);
+    where.appendChild(el("small", null, ev.address));
+    card.appendChild(where);
+
+    var actions = el("div", "actions");
+    var map = el("a", "btn secondary", "Open in Google Maps");
+    map.href = ev.mapsUrl; map.target = "_blank"; map.rel = "noopener";
+    actions.appendChild(map);
+
+    var d = el("details", "cal");
+    d.appendChild(el("summary", null, "Add to calendar"));
+    var links = el("div", "cal-links");
+    var g = el("a", null, "Google Calendar");
+    g.href = googleCalUrl(ev); g.target = "_blank"; g.rel = "noopener";
+    var ics = el("a", null, "Apple or Outlook");
+    ics.href = ev.icsFile;
+    links.appendChild(g); links.appendChild(ics);
+    d.appendChild(links);
+    actions.appendChild(d);
+    card.appendChild(actions);
+    return card;
+  }
+
+  // ---------- opening the personal link ----------
+
+  $("deadline-2").textContent = CFG.deadlineText;
+
+  if (!CFG.apiUrl) {
+    var note = $("demo-note");
+    note.hidden = false;
+    note.appendChild(document.createTextNode("Preview with sample guests. Try these personal links: "));
+    Object.keys(DEMO).forEach(function (k, i) {
+      if (i) note.appendChild(document.createTextNode(", "));
+      var a = el("a", null, DEMO[k].display);
+      a.href = "?i=" + k;
+      note.appendChild(a);
+    });
+  }
+
+  function start() {
+    code = (new URLSearchParams(window.location.search).get("i") || "").trim();
+    if (!/^[A-Za-z0-9]{4,24}$/.test(code)) { show("lost"); return; }
+    api("get", { code: code }).then(function (r) {
+      if (!r.ok) { show("lost"); return; }
+      household = r.household;
+      saved = r.response;
+      open = r.open;
+      if (saved) { renderDone(); show("done"); }
+      else if (!open) { show("closed"); }
+      else { answers = {}; renderForm(); show("form"); }
+    }).catch(function () {
+      $("view-lost").querySelector("h2").textContent = "We could not reach the server";
+      $("view-lost").querySelector("p").textContent = "Please check your internet connection and reload this page.";
+      show("lost");
+    });
+  }
+
+  // ---------- the reply form ----------
+
+  function renderForm() {
+    var prior = saved ? saved.answers : {};
+    $("form-title").textContent = "Welcome, " + household.display;
+    $("message").value = saved ? (saved.message || "") : "";
+    showError("form-error");
+    var wrap = $("events");
+    wrap.textContent = "";
+
+    household.events.forEach(function (evId) {
+      var ev = eventById(evId);
+      if (!ev) return;
+      answers[evId] = prior[evId] ? { attending: prior[evId].attending, count: prior[evId].count } : { attending: null, count: null };
+      var card = eventCard(ev);
+
+      card.appendChild(el("p", "q", "Will you be joining us?"));
+      var choice = el("div", "choice");
+      var yes = el("button", "btn yes", "Yes, we will be there");
+      var no = el("button", "btn no", "Sorry, we cannot make it");
+      yes.type = no.type = "button";
+      choice.appendChild(yes); choice.appendChild(no);
+      card.appendChild(choice);
+
+      var countWrap = el("div", "count-wrap");
+      card.appendChild(countWrap);
+
+      function refresh() {
+        var a = answers[evId];
+        yes.setAttribute("aria-pressed", a.attending === true ? "true" : "false");
+        no.setAttribute("aria-pressed", a.attending === false ? "true" : "false");
+        countWrap.textContent = "";
+        if (a.attending === true) {
+          countWrap.appendChild(el("p", "q", "How many people will be coming, including you?"));
+          var grid = el("div", "counts");
+          for (var n = 1; n <= household.max; n++) {
+            (function (n) {
+              var b = el("button", null, String(n));
+              b.type = "button";
+              b.setAttribute("aria-pressed", a.count === n ? "true" : "false");
+              b.setAttribute("aria-label", n + (n === 1 ? " person" : " people"));
+              b.addEventListener("click", function () { a.count = n; refresh(); });
+              grid.appendChild(b);
+            })(n);
+          }
+          countWrap.appendChild(grid);
+          countWrap.appendChild(el("p", "limit-note", household.max === 1 ? "Your invitation is for 1 guest." : "Your invitation is for up to " + household.max + " guests."));
+        }
+      }
+      yes.addEventListener("click", function () { answers[evId].attending = true; refresh(); });
+      no.addEventListener("click", function () { answers[evId].attending = false; answers[evId].count = 0; refresh(); });
+      refresh();
+      wrap.appendChild(card);
+    });
+  }
+
+  $("rsvp-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    showError("form-error");
+    var ids = Object.keys(answers), i, a;
+    for (i = 0; i < ids.length; i++) {
+      a = answers[ids[i]];
+      var name = eventById(ids[i]).name;
+      if (a.attending === null) { showError("form-error", "Please tell us if you can come to the " + name + "."); return; }
+      if (a.attending && !a.count) { showError("form-error", "Please choose how many people are coming to the " + name + "."); return; }
+    }
+    var btn = $("send-btn");
+    busy(btn, true, "Sending...");
+    api("submit", { code: code, answers: answers, message: $("message").value.trim() }).then(function (r) {
+      if (!r.ok) {
+        showError("form-error", r.error === "closed"
+          ? "Sorry, replies have closed. Please contact Irfan or Aafia directly."
+          : "Something went wrong. Please try again.");
+        return;
+      }
+      saved = r.response;
+      renderDone();
+      show("done");
+    }).catch(function () {
+      showError("form-error", NETWORK_MSG);
+    }).then(function () { busy(btn, false, "Send my reply"); });
+  });
+
+  // ---------- thank you ----------
+
+  function renderDone() {
+    $("done-title").textContent = "Thank you, " + household.display;
+    var sum = $("done-summary"), extra = $("done-extra");
+    sum.textContent = ""; extra.textContent = "";
+    sum.className = "summary";
+
+    household.events.forEach(function (evId) {
+      var ev = eventById(evId), a = saved.answers[evId];
+      if (!ev || !a) return;
+      var p = el("p");
+      if (a.attending) {
+        p.appendChild(document.createTextNode("We will see you at the " + ev.name + ": "));
+        p.appendChild(el("strong", null, a.count + (a.count === 1 ? " guest" : " guests")));
+        p.appendChild(document.createTextNode("."));
+        extra.appendChild(eventCard(ev));
+      } else {
+        p.textContent = "We are sorry you cannot make the " + ev.name + ". You will be missed.";
+      }
+      sum.appendChild(p);
+    });
+    if (saved.message) sum.appendChild(el("p", null, "Your message has been passed on to us."));
+
+    $("change-btn").hidden = !open;
+    $("done-note").textContent = open
+      ? "You can change your answer any time until " + CFG.deadlineText + "."
+      : "Replies are now closed. To make a change, please contact Irfan or Aafia directly.";
+  }
+
+  $("change-btn").addEventListener("click", function () {
+    answers = {};
+    renderForm();
+    show("form");
+  });
+
+  start();
+})();
