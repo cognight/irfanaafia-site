@@ -275,11 +275,47 @@
   start();
 })();
 
-// Pause the endless motion in the artwork while it is scrolled out of view (saves battery).
+// The invitation film: the opening scene plays once, then fades into the invitation card.
+// The card keeps moving gently, but only while it is on screen (saves battery).
 (function () {
-  var frame = document.querySelector(".frame");
-  if (!frame || !("IntersectionObserver" in window)) return;
+  var frame = document.getElementById("film");
+  if (!frame) return;
+  var card = frame.querySelector(".scene-card");
+  var opening = frame.querySelector(".scene-open");
+  var still = frame.classList.contains("is-still"); // this phone asked for less motion
+  var OPENING_SECONDS = 5.6; // how long the opening scene shows before the invitation
+  var showingCard = still, onScreen = true;
+
+  function play(v) {
+    var p = v.play();
+    return (p && p.then) ? p : Promise.resolve();
+  }
+
+  function showCard() {
+    if (showingCard) return;
+    showingCard = true;
+    frame.classList.remove("is-opening");
+    frame.classList.add("is-card");
+    if (onScreen) play(card).catch(function () {});
+    setTimeout(function () { opening.pause(); }, 1600);
+  }
+
+  if (!still) {
+    opening.addEventListener("timeupdate", function () {
+      if (opening.currentTime >= OPENING_SECONDS) showCard();
+    });
+    opening.addEventListener("ended", showCard);
+    frame.querySelector(".opening").addEventListener("click", showCard); // a tap skips ahead
+    play(opening).catch(showCard); // phones that will not play video go straight to the invitation
+    setTimeout(function () { if (opening.currentTime < 0.2) showCard(); }, 4000); // slow connection
+    setTimeout(showCard, 12000);
+  }
+
+  if (!("IntersectionObserver" in window)) return;
   new IntersectionObserver(function (entries) {
-    frame.classList.toggle("is-offscreen", !entries[0].isIntersecting);
+    onScreen = entries[0].isIntersecting;
+    frame.classList.toggle("is-offscreen", !onScreen);
+    if (still || !showingCard) return;
+    if (onScreen) play(card).catch(function () {}); else card.pause();
   }).observe(frame);
 })();

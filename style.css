@@ -24,33 +24,42 @@ body {
   line-height: 1.5;
 }
 
-.hero { padding: 16px 14px 0; }
+.hero { padding: 0; }
 
 .frame {
   position: relative;
   width: 100%;
-  max-width: 440px;
+  max-width: 520px;
   margin: 0 auto;
-  aspect-ratio: 400 / 620;
+  aspect-ratio: 9 / 16;
   container-type: inline-size;
-  border-radius: 26px;
+  border-radius: 0;
+  overflow: hidden;
+  background: #F3E3DF;
   box-shadow: 0 10px 24px rgba(168, 64, 95, .2);
 }
-.frame .art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+@media (min-width: 521px) {
+  .hero { padding: 16px 14px 0; }
+  .frame { max-width: 440px; border-radius: 26px; }
+}
+/* the animated card: a looping video, with a still picture shown until it loads */
+.frame .art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; pointer-events: none; }
 
+/* the words sit on the plain panel inside the arch, above the couple */
 .frame .text {
   position: absolute;
-  left: 13%;
-  right: 13%;
-  top: 28%;
+  left: 27%;
+  right: 27%;
+  top: 19.2%;
   text-align: center;
 }
 
 .eyebrow {
-  margin: 0 0 1.5cqw;
-  font-size: 11px;
-  font-size: max(11px, 3.2cqw);
-  letter-spacing: .1em;
+  margin: 0 0 1.2cqw;
+  font-size: 10px;
+  font-size: max(10px, 2.75cqw);
+  line-height: 1.3;
+  letter-spacing: .07em;
   text-transform: uppercase;
   color: var(--sage-deep);
   font-weight: 700;
@@ -60,33 +69,36 @@ body {
   margin: 0;
   font-family: "Pinyon Script", "Snell Roundhand", cursive;
   font-weight: 400;
-  font-size: 40px;
-  font-size: 11cqw;
-  line-height: 1.25;
+  font-size: 38px;
+  font-size: 10.6cqw;
+  line-height: 1;
   white-space: nowrap;
   color: var(--rose-deep);
 }
+.names .n1, .names .n2, .names .amp { display: block; }
+.names .n1, .names .n2 { padding: .08em 0; }
 .names .amp {
   font-family: "Playfair Display", Georgia, serif;
   font-style: italic;
-  font-size: .72em;
+  font-size: .42em;
+  line-height: 1;
   color: var(--sage-deep);
-  padding: 0 .08em;
 }
 
-.lead { margin: 1cqw 0 0; color: var(--muted); font-size: 15px; font-size: max(15px, 4.2cqw); }
+.lead { margin: 1.4cqw 0 0; color: var(--muted); font-size: 12px; font-size: max(11.5px, 3.3cqw); white-space: nowrap; }
 
 .occasion {
   margin: 0;
   font-family: "Lora", Georgia, serif;
   font-weight: 600;
-  font-size: 30px;
-  font-size: 9cqw;
-  letter-spacing: .06em;
+  font-size: 29px;
+  font-size: 8cqw;
+  line-height: 1.25;
+  letter-spacing: .05em;
   color: var(--sage-deep);
 }
 
-.when { margin: .5cqw 0 0; font-weight: 700; font-size: 16px; font-size: max(16px, 4.6cqw); }
+.when { margin: .4cqw 0 0; font-weight: 700; line-height: 1.3; font-size: 14px; font-size: max(13px, 3.8cqw); }
 
 main { max-width: 560px; margin: 0 auto; padding: 4px 16px 8px; }
 
@@ -273,106 +285,80 @@ footer { text-align: center; padding: 30px 20px 56px; }
   @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 }
 
-/* ---------- animated invitation artwork ---------- */
+/* ---------- the invitation film ---------- */
+/* Scene one (the opening) plays once on top of the invitation card, then fades away. */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes shadowIn { from { opacity: 0; } to { opacity: .14; } }
-@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-@keyframes grow { from { transform: scale(0); } to { transform: none; } }
-
-.bg-in { animation: fadeIn .7s ease-out both; }
-.arch-fill { animation: fadeIn .9s ease-out .85s both; }
-.arch-line, .arch-line2 { stroke-dasharray: 1; stroke-dashoffset: 0; }
-.arch-line { animation: draw 1.3s cubic-bezier(.5, 0, .2, 1) .2s both; }
-.arch-line2 { animation: draw 1.3s cubic-bezier(.5, 0, .2, 1) .55s both; }
-
-/* a soft band of light that passes over the arch now and then */
-.sheen-move { animation: sheen 9s ease-in-out 6s infinite; }
-@keyframes sheen { 0% { transform: translateX(0); } 40%, 100% { transform: translateX(580px); } }
-
-/* chandelier lowers on its chain, then sways gently */
-.chan-drop { animation: chanDrop 1.4s cubic-bezier(.22, 1.3, .5, 1) 1s both; }
-@keyframes chanDrop { from { transform: translateY(-190px); } to { transform: none; } }
-.chan-sway { transform-origin: 0 0; animation: chanSway 7s ease-in-out 2.4s infinite; }
-@keyframes chanSway { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(1.8deg); } 75% { transform: rotate(-1.8deg); } }
-
-/* candles light one by one, then flicker */
-.flame { transform-box: fill-box; transform-origin: 50% 100%;
-  animation: flameIn .5s ease-out var(--d) both, flicker var(--f) ease-in-out calc(var(--d) + .5s) infinite; }
-@keyframes flameIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-@keyframes flicker {
-  0%, 100% { transform: scale(1, 1) skewX(0); }
-  18% { transform: scale(.9, 1.14) skewX(-4deg); }
-  42% { transform: scale(1.07, .9) skewX(3deg); }
-  68% { transform: scale(.95, 1.1) skewX(-2deg); }
-}
-.glow { animation: fadeIn .9s ease-out var(--d) both; }
-
-.spark { transform-box: fill-box; transform-origin: center; opacity: 0; animation: spark 3.6s ease-in-out var(--d) infinite; }
-@keyframes spark {
-  0% { transform: scale(0) rotate(0); opacity: 0; }
-  35% { transform: scale(1) rotate(45deg); opacity: 1; }
-  70% { transform: scale(0) rotate(90deg); opacity: 0; }
-  100% { transform: scale(0); opacity: 0; }
-}
-
-/* flowers grow in, then each corner sways gently */
-.leaf-grow { transform-origin: 0 0; animation: grow .9s cubic-bezier(.2, .9, .3, 1.25) var(--d) both; }
-.bloom { transform-origin: 0 0; animation: bloom 1.1s cubic-bezier(.2, .9, .3, 1.1) var(--d) both; }
-@keyframes bloom { 0% { transform: scale(0) rotate(-70deg); opacity: 0; } 55% { opacity: 1; } 100% { transform: none; opacity: 1; } }
-.pop { transform-origin: 0 0; animation: grow .6s cubic-bezier(.2, 1.6, .4, 1) var(--d) both; }
-.corner-sway { transform-origin: 0 0; animation: cornerSway var(--sd) ease-in-out var(--sdel) infinite; }
-@keyframes cornerSway { 0%, 100% { transform: rotate(-1.3deg) scale(1); } 50% { transform: rotate(1.3deg) scale(1.02); } }
-
-/* the couple arrives and comes to life */
-.shadow-in { animation: shadowIn 1.2s ease-out 3.6s both; }
-.couple-in { animation: coupleIn 1.2s cubic-bezier(.2, .8, .3, 1) 3.6s both; }
-@keyframes coupleIn { from { transform: translateY(22px); opacity: 0; } to { transform: none; opacity: 1; } }
-.couple-breathe { transform-origin: 200px 592px; animation: coupleBreathe 4.8s ease-in-out 4.8s infinite; }
-@keyframes coupleBreathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.004, 1.01); } }
-.veil-sway { transform-origin: 236px 424px; animation: veilSway 4.2s ease-in-out 4.8s infinite; }
-@keyframes veilSway { 0%, 100% { transform: skewX(0) rotate(0); } 33% { transform: skewX(2.4deg) rotate(1deg); } 66% { transform: skewX(-1.6deg) rotate(-.8deg); } }
-.groom-head { transform-origin: 196px 426px; animation: nod 6s ease-in-out 5s infinite; }
-@keyframes nod { 0%, 100% { transform: rotate(0); } 40% { transform: rotate(2deg); } 70% { transform: rotate(-1deg); } }
-.bride-head { transform-origin: 232px 452px; animation: lean 6.5s ease-in-out 5s infinite; }
-@keyframes lean { 0%, 100% { transform: rotate(0); } 45% { transform: rotate(-3.5deg); } }
-.skirt-sway { transform-origin: 236px 488px; animation: skirt 4.6s ease-in-out 4.8s infinite; }
-@keyframes skirt { 0%, 100% { transform: skewX(0); } 50% { transform: skewX(1.2deg); } }
-
-/* petals flutter down, hearts float up */
-.petal { animation: petalFall var(--t) ease-in-out var(--d) infinite both; }
-@keyframes petalFall {
-  0% { transform: translate(calc(var(--amp) * -1), -24px) rotate(-40deg); opacity: 0; }
-  6% { opacity: 1; }
-  16% { transform: translate(var(--amp), 70px) rotate(50deg); }
-  33% { transform: translate(calc(var(--amp) * -.8), 220px) rotate(-30deg); }
-  50% { transform: translate(var(--amp), 350px) rotate(60deg); }
-  66% { transform: translate(calc(var(--amp) * -1), 460px) rotate(-40deg); }
-  83% { transform: translate(calc(var(--amp) * .8), 560px) rotate(40deg); opacity: 1; }
-  100% { transform: translate(calc(var(--amp) * -.6), 650px) rotate(-20deg); opacity: 0; }
-}
-.heart { animation: floatUp var(--t) ease-out var(--d) infinite both; }
-@keyframes floatUp {
-  0% { transform: translate(0, 0) scale(.3); opacity: 0; }
-  15% { transform: translate(calc(var(--dx) * .2), -14px) scale(1); opacity: 1; }
-  100% { transform: translate(var(--dx), -130px) scale(.9); opacity: 0; }
-}
-
-/* the words appear in turn */
-.eyebrow { animation: fadeUp .9s ease-out 2.2s both; }
-.names { animation: wipe 2.1s cubic-bezier(.4, 0, .2, 1) 2.5s both; }
-.lead { animation: fadeUp .8s ease-out 4.3s both; }
-.occasion { animation: textPop 1s cubic-bezier(.2, .9, .3, 1.2) 4.6s both; }
-.when { animation: fadeUp .8s ease-out 5.1s both; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes wipe { from { clip-path: inset(-20% 100% -20% -8%); } to { clip-path: inset(-20% -8% -20% -8%); } }
 @keyframes textPop { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+@keyframes nudge { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+
+.opening {
+  position: absolute; inset: 0; z-index: 3;
+  background: #4A2F36;
+  opacity: 0; visibility: hidden;
+  transition: opacity 1.4s ease, visibility 0s linear 1.4s;
+}
+.frame.is-opening .opening { opacity: 1; visibility: visible; transition: none; }
+/* a soft glow behind the initials so they read over the scene */
+.opening::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 62% 17% at 50% 30%, rgba(255, 247, 236, .55), transparent 100%);
+  opacity: 0;
+}
+.frame.is-opening .opening::after { animation: fadeIn 1.2s ease-out .5s both; }
+
+/* the couple's initials write themselves over the opening scene */
+.monogram {
+  position: absolute; left: 0; right: 0; top: 22%; z-index: 1;
+  margin: 0; text-align: center; white-space: nowrap;
+  font-family: "Pinyon Script", "Snell Roundhand", cursive;
+  font-size: 30cqw; line-height: 1.1;
+  color: #8C2B4C;
+  text-shadow: 0 0 14px rgba(255, 248, 238, .95), 0 0 3px rgba(255, 248, 238, .8);
+}
+.mono-i, .mono-a, .mono-amp { display: inline-block; opacity: 0; }
+.mono-i, .mono-a { padding: 0 .06em; }
+.mono-amp {
+  font-family: "Playfair Display", Georgia, serif; font-style: italic;
+  font-size: .36em; padding: 0 .2em; color: #A8782C; vertical-align: .5em;
+}
+.frame.is-opening .mono-i { opacity: 1; animation: wipe 1.3s cubic-bezier(.4, 0, .2, 1) .9s both; }
+.frame.is-opening .mono-amp { animation: fadeIn .8s ease-out 1.9s both; }
+.frame.is-opening .mono-a { opacity: 1; animation: wipe 1.3s cubic-bezier(.4, 0, .2, 1) 2.2s both; }
+
+/* the words of the invitation appear line by line once the card is showing */
+.frame .text { z-index: 2; }
+.frame.is-opening .text > *, .frame.is-opening .cue { opacity: 0; }
+.frame.is-card .eyebrow { animation: fadeUp .9s ease-out .9s both; }
+.frame.is-card .names .n1 { animation: wipe 1.2s cubic-bezier(.4, 0, .2, 1) 1.5s both; }
+.frame.is-card .names .amp { animation: fadeIn .7s ease-out 2.4s both; }
+.frame.is-card .names .n2 { animation: wipe 1.2s cubic-bezier(.4, 0, .2, 1) 2.7s both; }
+.frame.is-card .lead { animation: fadeUp .8s ease-out 3.9s both; }
+.frame.is-card .occasion { animation: textPop 1s cubic-bezier(.2, .9, .3, 1.2) 4.3s both; }
+.frame.is-card .when { animation: fadeUp .8s ease-out 4.9s both; }
+
+/* a small pointer to the reply form further down */
+.cue {
+  position: absolute; left: 50%; bottom: 2.4%; z-index: 2;
+  margin: 0; padding: .3em 1em; transform: translateX(-50%);
+  border-radius: 999px;
+  background: rgba(255, 250, 244, .88);
+  box-shadow: 0 2px 10px rgba(80, 30, 45, .2);
+  color: var(--rose-deep); font-weight: 700; letter-spacing: .03em; white-space: nowrap;
+  font-size: 14px; font-size: max(14px, 3.8cqw);
+  opacity: 0;
+}
+.cue::after { content: "\2193"; display: inline-block; margin-left: .45em; animation: nudge 1.6s ease-in-out infinite; }
+.frame.is-card .cue { animation: fadeIn .9s ease-out 6.3s both; }
 
 /* save battery: stop the endless motion while the artwork is off screen */
 .frame.is-offscreen *, .frame.is-offscreen { animation-play-state: paused !important; }
 
-/* people who ask their phone for less motion get the finished picture, standing still */
+/* people who ask their phone for less motion get the finished invitation, standing still */
+.frame.is-still .text > *, .frame.is-still .cue, .frame.is-still .cue::after { animation: none !important; opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
-  .frame *, .frame .text * { animation: none !important; }
-  .eyebrow, .names, .lead, .occasion, .when { animation: none !important; }
-  .petal, .heart, .spark, .sheen-move { display: none; }
+  .frame *, .frame *::after { animation: none !important; }
+  .frame .text > *, .frame .cue { opacity: 1; }
+  .opening { display: none; }
 }
