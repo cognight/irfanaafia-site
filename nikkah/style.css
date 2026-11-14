@@ -1,0 +1,463 @@
+:root {
+  --blush: #F6E6DA;
+  --rose-soft: #D9A0A4;
+  --rose: #B4505C;
+  --rose-deep: #8E1B2E;   /* deep red: headings, names */
+  --sage: #C2A063;        /* gold: focus rings */
+  --sage-deep: #7A5B1E;   /* bronze: accents, chosen answers */
+  --ink: #3A2A28;
+  --muted: #6B5852;
+  --line: #DFCBA5;
+  --gold: #C2A063;
+  --card: #FFFBF4;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: #3A0C15 linear-gradient(180deg, #4E111D 0, #3A0C15 60%, #2E0910 100%) no-repeat;
+  color: var(--ink);
+  font-family: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 19px;
+  line-height: 1.5;
+}
+
+.hero { padding: 0; }
+
+.frame {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  aspect-ratio: 9 / 16;
+  container-type: inline-size;
+  border-radius: 0;
+  overflow: hidden;
+  background: #2A0C12;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+}
+@media (min-width: 521px) {
+  .hero { padding: 16px 14px 0; }
+  .frame { max-width: 440px; border-radius: 26px; }
+}
+/* the animated card: a looping video, with a still picture shown until it loads */
+.frame .art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; pointer-events: none; }
+
+/* the words sit on the plain panel inside the arch, above the couple */
+.frame .text {
+  position: absolute;
+  left: 26%;
+  right: 26%;
+  top: 20.4%;
+  text-align: center;
+}
+
+.bismillah {
+  margin: 0 0 .6cqw;
+  font-family: "Amiri", "Geeza Pro", "Traditional Arabic", serif;
+  font-size: 15px;
+  font-size: max(13px, 3.8cqw);
+  line-height: 1.4;
+  color: #7A5B1E;
+}
+
+.eyebrow {
+  margin: 0 0 1cqw;
+  font-size: 9px;
+  font-size: max(9px, 2.45cqw);
+  line-height: 1.3;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #7A5B1E;
+  font-weight: 700;
+}
+
+.names {
+  margin: 0;
+  font-family: "Pinyon Script", "Snell Roundhand", cursive;
+  font-weight: 400;
+  font-size: 33px;
+  font-size: 9cqw;
+  line-height: 1;
+  white-space: nowrap;
+  color: #8E1B2E;
+}
+.names .n1, .names .n2, .names .amp { display: block; }
+.names .n1, .names .n2 { padding: .08em 0; }
+.names .amp {
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-size: .4em;
+  line-height: 1;
+  color: #9A7A35;
+}
+
+.lead { margin: .9cqw 0 0; line-height: 1.3; color: var(--muted); font-size: 12px; font-size: max(11.5px, 3.2cqw); white-space: nowrap; }
+
+.occasion {
+  margin: 0;
+  font-family: "Lora", Georgia, serif;
+  font-weight: 600;
+  font-size: 27px;
+  font-size: 7.2cqw;
+  line-height: 1.22;
+  letter-spacing: .06em;
+  color: #8E1B2E;
+}
+
+/* a guest's own invitation greets them by name */
+.eyebrow.is-name {
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 12px;
+  font-size: max(11.5px, 3.2cqw);
+  line-height: 1.25;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: normal;
+  color: #8E1B2E;
+  max-width: 34cqw;
+  margin-left: auto;
+  margin-right: auto;
+  text-wrap: balance;
+}
+.frame.has-name .text { top: 20.4%; }
+.frame.has-name .names { font-size: 31px; font-size: 8.5cqw; }
+.frame.has-name .lead { line-height: 1.3; }
+
+.when { margin: .5cqw 0 0; font-weight: 700; line-height: 1.3; white-space: nowrap; font-size: 12px; font-size: max(12px, 3.2cqw); }
+
+main { max-width: 560px; margin: 0 auto; padding: 8px 18px 8px; }
+
+/* each panel is an ivory card with a fine double gold edge and roses at two corners */
+.card {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--gold);
+  border-radius: 22px;
+  padding: 34px 22px 60px;
+  margin: 26px 0;
+  box-shadow: inset 0 0 0 5px var(--card), inset 0 0 0 6px rgba(194, 160, 99, .6), 0 12px 30px rgba(0, 0, 0, .35);
+}
+.card::before, .card::after {
+  content: "";
+  position: absolute;
+  width: 84px;
+  height: 73px;
+  background: url("roses.webp?v=2") left bottom / cover no-repeat;
+  pointer-events: none;
+}
+.card::after { left: 0; bottom: 0; border-bottom-left-radius: 21px; }
+.card::before { right: 0; top: 0; border-bottom-left-radius: 21px; transform: rotate(180deg); }
+
+h2 {
+  margin: 0 0 6px;
+  padding: 0 22px;
+  text-align: center;
+  font-family: "Lora", Georgia, serif;
+  font-weight: 600;
+  font-size: 26px;
+  line-height: 1.25;
+  color: var(--rose-deep);
+}
+h2:focus { outline: none; }
+/* a small gold flourish under each heading */
+h2::after {
+  content: "";
+  display: block;
+  width: 120px;
+  height: 11px;
+  margin: 12px auto 14px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 11'%3E%3Cpath d='M2 5.5h46M72 5.5h46' stroke='%23C2A063' stroke-width='1' stroke-linecap='round'/%3E%3Cpath d='M60 1l4.5 4.5L60 10l-4.5-4.5z' fill='%23C2A063'/%3E%3Ccircle cx='51.500' cy='5.5' r='1.2' fill='%23C2A063'/%3E%3Ccircle cx='68.500' cy='5.5' r='1.2' fill='%23C2A063'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+h3 {
+  margin: 0 0 8px;
+  font-family: "Lora", Georgia, serif;
+  font-weight: 600;
+  font-size: 23px;
+  color: var(--sage-deep);
+}
+
+.help { margin: 0 0 18px; color: var(--muted); text-align: center; }
+
+label, .q {
+  display: block;
+  margin: 18px 0 8px;
+  font-weight: 700;
+  font-size: 19px;
+}
+
+input[type="text"], textarea {
+  width: 100%;
+  min-height: 58px;
+  padding: 14px 16px;
+  font: inherit;
+  color: var(--ink);
+  background: #fff;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+}
+textarea { min-height: 120px; resize: vertical; }
+input[type="text"]:focus, textarea:focus, button:focus-visible, summary:focus-visible, a:focus-visible {
+  outline: 3px solid var(--sage);
+  outline-offset: 2px;
+  border-color: var(--sage-deep);
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  min-height: 58px;
+  margin-top: 16px;
+  padding: 14px 18px;
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+.btn.primary { background: #8E1B2E; color: #fff; }
+.btn.primary:active { background: #6F1423; }
+.btn.primary[disabled] { opacity: .65; cursor: progress; }
+.btn.secondary { background: #FFFDF9; color: var(--rose-deep); border-color: var(--gold); }
+.btn.link { background: none; color: var(--muted); text-decoration: underline; min-height: 48px; margin-top: 8px; }
+
+.deadline { margin: 18px 0 0; text-align: center; color: var(--muted); font-size: 17px; }
+
+.error {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  background: #FBE7E4;
+  border-left: 5px solid var(--rose-deep);
+  border-radius: 8px;
+  color: #6E2237;
+}
+
+.demo-note {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  background: #F7EEDB;
+  border: 1px dashed var(--gold);
+  border-radius: 10px;
+  font-size: 16px;
+  color: var(--sage-deep);
+}
+
+.demo-note a { color: var(--sage-deep); font-weight: 700; }
+
+.pick-list { list-style: none; margin: 0; padding: 0; }
+.pick-list .btn { margin-top: 12px; background: #fff; color: var(--ink); border-color: var(--line); font-size: 20px; }
+.pick-list .btn:active { border-color: var(--sage-deep); }
+
+.event {
+  margin: 18px 0 8px;
+  padding: 18px 16px 20px;
+  background: #FBF3E6;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  text-align: center;
+}
+.event .q, .event .limit-note { text-align: left; }
+.event .when-line { margin: 0; font-weight: 700; }
+.event .where { margin: 6px 0 0; }
+.event .where small { display: block; color: var(--muted); font-size: 17px; }
+
+.actions { display: grid; gap: 10px; margin: 14px 0 4px; }
+.actions .btn { margin: 0; min-height: 52px; font-size: 18px; }
+
+details.cal summary {
+  list-style: none;
+  display: block;
+  min-height: 52px;
+  padding: 12px 18px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 18px;
+  background: #FFFDF9;
+  color: var(--rose-deep);
+  border: 2px solid var(--gold);
+  border-radius: 14px;
+  cursor: pointer;
+}
+details.cal summary::-webkit-details-marker { display: none; }
+details.cal[open] summary { border-color: var(--sage-deep); color: var(--sage-deep); }
+details.cal .cal-links { display: grid; gap: 10px; margin-top: 10px; }
+details.cal .cal-links a {
+  display: block;
+  min-height: 50px;
+  padding: 12px 16px;
+  text-align: center;
+  color: var(--sage-deep);
+  font-weight: 700;
+  text-decoration: none;
+  background: #F5EBD6;
+  border-radius: 12px;
+}
+
+.choice { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.choice .btn { margin: 0; min-height: 60px; background: #fff; color: var(--ink); border-color: var(--line); line-height: 1.25; }
+.choice .btn[aria-pressed="true"].yes { background: var(--sage-deep); color: #fff; border-color: var(--sage-deep); }
+.choice .btn[aria-pressed="true"].no { background: var(--rose-deep); color: #fff; border-color: var(--rose-deep); }
+
+.count-wrap { margin-top: 6px; }
+.counts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.counts button {
+  min-height: 58px;
+  font: inherit;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--ink);
+  background: #fff;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  cursor: pointer;
+}
+.counts button[aria-pressed="true"] { background: var(--sage-deep); color: #fff; border-color: var(--sage-deep); }
+.limit-note { margin: 8px 0 0; color: var(--muted); font-size: 17px; }
+
+.heart { text-align: center; font-size: 34px; color: #A8303F; line-height: 1; margin-bottom: 8px; }
+#view-done h2 { text-align: center; }
+#view-done .summary { text-align: center; margin: 10px 0 4px; }
+#view-done .summary p { margin: 4px 0; }
+#view-done .summary strong { color: var(--sage-deep); }
+
+footer { text-align: center; padding: 26px 20px 60px; }
+.sign { margin: 0; font-family: "Pinyon Script", cursive; font-size: 38px; line-height: 1.3; color: #F0DDB4; }
+.sign .amp { font-family: "Playfair Display", Georgia, serif; font-style: italic; font-size: .66em; color: #C9A45E; padding: 0 .08em; }
+
+@media (min-width: 640px) {
+  body { font-size: 20px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card { animation: rise .35s ease-out; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+}
+
+/* ---------- the invitation film ---------- */
+/* The opening plays once on top of the invitation: the doors open and the camera walks in to
+   the couple in one shot, ending on the very picture the invitation starts from. */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes wipe { from { clip-path: inset(-20% 100% -20% -8%); } to { clip-path: inset(-20% -8% -20% -8%); } }
+@keyframes textPop { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+@keyframes nudge { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+
+.opening {
+  position: absolute; inset: 0; z-index: 3;
+  background: #2A0C12;
+  opacity: 0; visibility: hidden;
+  transition: opacity .7s ease-in-out, visibility 0s linear .8s;
+}
+.frame.is-opening .opening { opacity: 1; visibility: visible; transition: none; }
+
+/* the couple's initials in gold on the doors; they fade as the doors begin to open */
+.monogram {
+  position: absolute; left: 0; right: 0; top: 20.6%; z-index: 1;
+  margin: 0; text-align: center; white-space: nowrap;
+  font-family: "Pinyon Script", "Snell Roundhand", cursive;
+  font-size: 21cqw; line-height: 1.1;
+  color: #EBCB85;
+  text-shadow: 0 .3cqw .8cqw rgba(20, 6, 4, .75), 0 0 2.4cqw rgba(235, 190, 110, .35);
+  opacity: 0;
+}
+.mono-i, .mono-a, .mono-amp { display: inline-block; }
+.mono-i { padding: 0 .16em 0 0; }
+.mono-a { padding: 0 0 0 .16em; }
+.mono-amp {
+  font-family: "Playfair Display", Georgia, serif; font-style: italic;
+  font-size: .3em; padding: 0 .1em; color: #F3DFAE; vertical-align: .55em;
+}
+.frame.is-opening .monogram { animation: monoIn .8s ease-out .15s both; }
+.frame.is-opening.doors-open .monogram { animation: monoOut .6s ease-in both; }
+@keyframes monoIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes monoOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(1.05); } }
+
+/* candlelight: a warm glow over each lantern that flickers */
+.glows { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity 1.6s ease; }
+.frame.is-card .glows { opacity: 1; }
+.frame.is-through .glows { transition-delay: .6s; }
+.glows i {
+  position: absolute; left: var(--x); top: var(--y);
+  width: 22cqw; height: 22cqw; margin: -11cqw 0 0 -11cqw; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 226, 160, .55) 0, rgba(255, 196, 110, .24) 32%, rgba(255, 180, 100, 0) 68%);
+  mix-blend-mode: screen;
+  animation: candle var(--t) ease-in-out var(--dl) infinite;
+}
+@keyframes candle {
+  0%, 100% { opacity: .5; transform: scale(.9); }
+  11% { opacity: .95; transform: scale(1.05); }
+  24% { opacity: .58; transform: scale(.94); }
+  39% { opacity: 1; transform: scale(1.1); }
+  55% { opacity: .66; transform: scale(.97); }
+  71% { opacity: .96; transform: scale(1.04); }
+  86% { opacity: .56; transform: scale(.92); }
+}
+/* the words of the invitation appear line by line once the invitation is showing */
+.frame .text { z-index: 2; }
+.frame.is-through { --d0: .1s; }
+.frame.is-opening .text > *, .frame.is-opening .cue { opacity: 0; }
+.frame.is-card .bismillah { animation: fadeUp 1s ease-out calc(var(--d0, 0s) + .5s) both; }
+.frame.is-card .eyebrow { animation: fadeUp .9s ease-out calc(var(--d0, 0s) + 1.2s) both; }
+.frame.is-card .names .n1 { animation: wipe 1.2s cubic-bezier(.4, 0, .2, 1) calc(var(--d0, 0s) + 1.8s) both; }
+.frame.is-card .names .amp { animation: fadeIn .7s ease-out calc(var(--d0, 0s) + 2.7s) both; }
+.frame.is-card .names .n2 { animation: wipe 1.2s cubic-bezier(.4, 0, .2, 1) calc(var(--d0, 0s) + 3s) both; }
+.frame.is-card .lead { animation: fadeUp .8s ease-out calc(var(--d0, 0s) + 4.2s) both; }
+.frame.is-card .occasion { animation: textPop 1s cubic-bezier(.2, .9, .3, 1.2) calc(var(--d0, 0s) + 4.6s) both; }
+.frame.is-card .when { animation: fadeUp .8s ease-out calc(var(--d0, 0s) + 5.2s) both; }
+
+/* a small pointer to the reply form further down */
+.cue {
+  position: absolute; left: 50%; bottom: 2.4%; z-index: 2;
+  margin: 0; padding: .3em 1em; transform: translateX(-50%);
+  border-radius: 999px;
+  background: rgba(255, 248, 236, .92);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .35);
+  color: var(--rose-deep); font-weight: 700; letter-spacing: .03em; white-space: nowrap;
+  font-size: 14px; font-size: max(14px, 3.8cqw);
+  opacity: 0;
+}
+.cue::after { content: "\2193"; display: inline-block; margin-left: .45em; animation: nudge 1.6s ease-in-out infinite; }
+.frame.is-card .cue { animation: fadeIn .9s ease-out calc(var(--d0, 0s) + 6.6s) both; }
+
+/* a small button to watch the opening again */
+.replay {
+  position: absolute; right: 3%; top: 1.6%; z-index: 2;
+  min-height: 40px; padding: 0 1em;
+  border: 0; border-radius: 999px;
+  background: rgba(255, 250, 244, .72);
+  box-shadow: 0 2px 8px rgba(80, 30, 45, .16);
+  color: var(--rose-deep); font: inherit; font-weight: 700; white-space: nowrap; cursor: pointer;
+  font-size: 12px; font-size: max(12px, 3.1cqw);
+  opacity: 0; visibility: hidden;
+}
+.replay::before { content: "\21BB"; margin-right: .4em; }
+.frame.is-card .replay { opacity: 1; visibility: visible; transition: opacity .9s ease; }
+.frame.is-through .replay { transition-delay: 8s; }
+
+/* people who have seen the opening before, or who ask their phone for less motion,
+   get the finished invitation straight away */
+.frame.is-seen .text *, .frame.is-still .text *,
+.frame.is-seen .cue, .frame.is-still .cue { animation: none !important; opacity: 1; }
+.frame.is-still .cue::after, .frame.is-still .glows i { animation: none !important; }
+.frame.is-still .replay { display: none; }
+
+/* used for an instant while the opening is put back to its start */
+.frame.no-move, .frame.no-move * { transition: none !important; }
+
+/* save battery: stop the endless motion while the artwork is off screen */
+.frame.is-offscreen *, .frame.is-offscreen *::before, .frame.is-offscreen *::after { animation-play-state: paused !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .frame *, .frame *::after { animation: none !important; transition: none !important; }
+  .frame .text > *, .frame .cue { opacity: 1; }
+  .opening, .replay { display: none; }
+}
