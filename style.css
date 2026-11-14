@@ -7,8 +7,9 @@
   --sage-deep: #4D6B49;
   --ink: #3A2F33;
   --muted: #6C5C62;
-  --line: #E8C3CE;
-  --card: #FFFDFD;
+  --line: #DFCBA5;
+  --gold: #C2A063;
+  --card: #FFFBF4;
 }
 
 * { box-sizing: border-box; }
@@ -17,7 +18,7 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
-  background: linear-gradient(180deg, #F4CAD6 0, var(--blush) 760px) no-repeat, var(--blush);
+  background: #DDB6B9 linear-gradient(180deg, #EEDAD3 0, #E3C2C3 55%, #DDB6B9 100%) no-repeat;
   color: var(--ink);
   font-family: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 19px;
@@ -36,7 +37,7 @@ body {
   border-radius: 0;
   overflow: hidden;
   background: #F3E3DF;
-  box-shadow: 0 10px 24px rgba(168, 64, 95, .2);
+  box-shadow: 0 10px 26px rgba(110, 50, 65, .28);
 }
 @media (min-width: 521px) {
   .hero { padding: 16px 14px 0; }
@@ -98,28 +99,71 @@ body {
   color: var(--sage-deep);
 }
 
+/* a guest's own invitation greets them by name */
+.eyebrow.is-name {
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 12px;
+  font-size: max(11.5px, 3.2cqw);
+  line-height: 1.25;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--rose-deep);
+  max-width: 33cqw;
+  margin-left: auto;
+  margin-right: auto;
+  text-wrap: balance;
+}
+.frame.has-name .text { top: 19.7%; }
+.frame.has-name .names { font-size: 36px; font-size: 10cqw; }
+.frame.has-name .lead { line-height: 1.3; }
+
 .when { margin: .4cqw 0 0; font-weight: 700; line-height: 1.3; font-size: 14px; font-size: max(13px, 3.8cqw); }
 
-main { max-width: 560px; margin: 0 auto; padding: 4px 16px 8px; }
+main { max-width: 560px; margin: 0 auto; padding: 8px 18px 8px; }
 
+/* each panel is an ivory card with a fine double gold edge and roses at two corners */
 .card {
+  position: relative;
   background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 24px 20px 26px;
-  margin: 16px 0;
-  box-shadow: 0 6px 22px rgba(168, 64, 95, .08);
+  border: 1px solid var(--gold);
+  border-radius: 22px;
+  padding: 34px 22px 60px;
+  margin: 26px 0;
+  box-shadow: inset 0 0 0 5px var(--card), inset 0 0 0 6px rgba(194, 160, 99, .6), 0 10px 28px rgba(110, 50, 65, .18);
 }
+.card::before, .card::after {
+  content: "";
+  position: absolute;
+  width: 84px;
+  height: 73px;
+  background: url("roses.webp?v=8") left bottom / cover no-repeat;
+  pointer-events: none;
+}
+.card::after { left: 0; bottom: 0; border-bottom-left-radius: 21px; }
+.card::before { right: 0; top: 0; border-bottom-left-radius: 21px; transform: rotate(180deg); }
 
 h2 {
   margin: 0 0 6px;
+  padding: 0 22px;
+  text-align: center;
   font-family: "Lora", Georgia, serif;
   font-weight: 600;
-  font-size: 27px;
+  font-size: 26px;
   line-height: 1.25;
   color: var(--rose-deep);
 }
 h2:focus { outline: none; }
+/* a small gold flourish under each heading */
+h2::after {
+  content: "";
+  display: block;
+  width: 120px;
+  height: 11px;
+  margin: 12px auto 14px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 11'%3E%3Cpath d='M2 5.5h46M72 5.5h46' stroke='%23C2A063' stroke-width='1' stroke-linecap='round'/%3E%3Cpath d='M60 1l4.5 4.5L60 10l-4.5-4.5z' fill='%23C2A063'/%3E%3Ccircle cx='51.500' cy='5.5' r='1.2' fill='%23C2A063'/%3E%3Ccircle cx='68.500' cy='5.5' r='1.2' fill='%23C2A063'/%3E%3C/svg%3E") center / contain no-repeat;
+}
 
 h3 {
   margin: 0 0 8px;
@@ -129,7 +173,7 @@ h3 {
   color: var(--sage-deep);
 }
 
-.help { margin: 0 0 18px; color: var(--muted); }
+.help { margin: 0 0 18px; color: var(--muted); text-align: center; }
 
 label, .q {
   display: block;
@@ -172,7 +216,7 @@ input[type="text"]:focus, textarea:focus, button:focus-visible, summary:focus-vi
 .btn.primary { background: var(--sage-deep); color: #fff; }
 .btn.primary:active { background: #3C5639; }
 .btn.primary[disabled] { opacity: .65; cursor: progress; }
-.btn.secondary { background: #fff; color: var(--rose-deep); border-color: var(--rose); }
+.btn.secondary { background: #FFFDF9; color: var(--rose-deep); border-color: var(--gold); }
 .btn.link { background: none; color: var(--muted); text-decoration: underline; min-height: 48px; margin-top: 8px; }
 
 .deadline { margin: 18px 0 0; text-align: center; color: var(--muted); font-size: 17px; }
@@ -205,10 +249,12 @@ input[type="text"]:focus, textarea:focus, button:focus-visible, summary:focus-vi
 .event {
   margin: 18px 0 8px;
   padding: 18px 16px 20px;
-  background: #FDF6F8;
+  background: #FBF3E6;
   border: 1px solid var(--line);
   border-radius: 16px;
+  text-align: center;
 }
+.event .q, .event .limit-note { text-align: left; }
 .event .when-line { margin: 0; font-weight: 700; }
 .event .where { margin: 6px 0 0; }
 .event .where small { display: block; color: var(--muted); font-size: 17px; }
@@ -224,9 +270,9 @@ details.cal summary {
   text-align: center;
   font-weight: 700;
   font-size: 18px;
-  background: #fff;
+  background: #FFFDF9;
   color: var(--rose-deep);
-  border: 2px solid var(--rose);
+  border: 2px solid var(--gold);
   border-radius: 14px;
   cursor: pointer;
 }
@@ -241,7 +287,7 @@ details.cal .cal-links a {
   color: var(--sage-deep);
   font-weight: 700;
   text-decoration: none;
-  background: #EEF3EC;
+  background: #EEF1E6;
   border-radius: 12px;
 }
 
@@ -272,8 +318,8 @@ details.cal .cal-links a {
 #view-done .summary p { margin: 4px 0; }
 #view-done .summary strong { color: var(--sage-deep); }
 
-footer { text-align: center; padding: 30px 20px 56px; }
-.sign { margin: 0; font-family: "Pinyon Script", cursive; font-size: 36px; line-height: 1.3; color: var(--rose-deep); }
+footer { text-align: center; padding: 26px 20px 60px; }
+.sign { margin: 0; font-family: "Pinyon Script", cursive; font-size: 38px; line-height: 1.3; color: #7E2944; }
 .sign .amp { font-family: "Playfair Display", Georgia, serif; font-style: italic; font-size: .66em; color: var(--sage-deep); padding: 0 .08em; }
 
 @media (min-width: 640px) {
@@ -286,7 +332,8 @@ footer { text-align: center; padding: 30px 20px 56px; }
 }
 
 /* ---------- the invitation film ---------- */
-/* Scene one (the opening) plays once on top of the invitation card, then fades away. */
+/* Scene one (the opening) plays once on top of the invitation. We then walk through the
+   gateway: the camera pushes in, its light fills the screen, and the invitation appears. */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes wipe { from { clip-path: inset(-20% 100% -20% -8%); } to { clip-path: inset(-20% -8% -20% -8%); } }
@@ -297,9 +344,25 @@ footer { text-align: center; padding: 30px 20px 56px; }
   position: absolute; inset: 0; z-index: 3;
   background: #4A2F36;
   opacity: 0; visibility: hidden;
-  transition: opacity 1.4s ease, visibility 0s linear 1.4s;
+  transition: opacity .9s ease .35s, visibility 0s linear 1.3s;
 }
 .frame.is-opening .opening { opacity: 1; visibility: visible; transition: none; }
+
+/* the camera glides slowly toward the gateway, then rushes through it */
+.scene-open { transform-origin: 50% 39%; transition: transform 7s cubic-bezier(.3, 0, .8, 1); }
+.frame.is-pushing .scene-open { transform: scale(1.16); }
+.frame.is-through .scene-open { transform: scale(2.7); transition: transform 1.3s cubic-bezier(.6, 0, .9, .55); }
+
+/* the light of the gateway fills the screen, then clears to show the invitation */
+.light {
+  position: absolute; inset: 0; z-index: 4; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle at 50% 39%, #FFFBF1 0, #FDEFD8 55%, #F6DFC6 100%);
+}
+.frame.is-through .light { animation: through 2.3s ease-in-out both; }
+@keyframes through { 0% { opacity: 0; } 40% { opacity: 1; } 56% { opacity: 1; } 100% { opacity: 0; } }
+.frame.is-through .scene-card { animation: arrive 2.6s cubic-bezier(.16, .7, .2, 1) .8s both; }
+@keyframes arrive { from { transform: scale(1.12); } to { transform: none; } }
+
 /* a soft glow behind the initials so they read over the scene */
 .opening::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
@@ -316,7 +379,9 @@ footer { text-align: center; padding: 30px 20px 56px; }
   font-size: 30cqw; line-height: 1.1;
   color: #8C2B4C;
   text-shadow: 0 0 14px rgba(255, 248, 238, .95), 0 0 3px rgba(255, 248, 238, .8);
+  transition: opacity .5s ease;
 }
+.frame.is-through .monogram { opacity: 0; }
 .mono-i, .mono-a, .mono-amp { display: inline-block; opacity: 0; }
 .mono-i, .mono-a { padding: 0 .06em; }
 .mono-amp {
@@ -327,16 +392,46 @@ footer { text-align: center; padding: 30px 20px 56px; }
 .frame.is-opening .mono-amp { animation: fadeIn .8s ease-out 1.9s both; }
 .frame.is-opening .mono-a { opacity: 1; animation: wipe 1.3s cubic-bezier(.4, 0, .2, 1) 2.2s both; }
 
-/* the words of the invitation appear line by line once the card is showing */
+/* candlelight: a warm glow over each lantern that flickers, and a slow shimmer across the scene */
+.glows { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity 1.6s ease; }
+.frame.is-card .glows { opacity: 1; }
+.frame.is-through .glows { transition-delay: 2.4s; }
+.glows i {
+  position: absolute; left: var(--x); top: var(--y);
+  width: 20cqw; height: 20cqw; margin: -10cqw 0 0 -10cqw; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 232, 170, .8) 0, rgba(255, 205, 125, .34) 30%, rgba(255, 190, 110, 0) 68%);
+  mix-blend-mode: screen;
+  animation: candle var(--t) ease-in-out var(--dl) infinite;
+}
+@keyframes candle {
+  0%, 100% { opacity: .5; transform: scale(.9); }
+  11% { opacity: .95; transform: scale(1.05); }
+  24% { opacity: .58; transform: scale(.94); }
+  39% { opacity: 1; transform: scale(1.1); }
+  55% { opacity: .66; transform: scale(.97); }
+  71% { opacity: .96; transform: scale(1.04); }
+  86% { opacity: .56; transform: scale(.92); }
+}
+.glows::after {
+  content: ""; position: absolute; top: -20%; left: 0; width: 46%; height: 140%;
+  background: linear-gradient(90deg, rgba(255, 244, 220, 0), rgba(255, 244, 220, .34) 50%, rgba(255, 244, 220, 0));
+  mix-blend-mode: soft-light;
+  transform: translateX(-140%) skewX(-14deg);
+  animation: shimmer 11s ease-in-out 4s infinite;
+}
+@keyframes shimmer { 0% { transform: translateX(-140%) skewX(-14deg); } 38%, 100% { transform: translateX(340%) skewX(-14deg); } }
+
+/* the words of the invitation appear line by line once the invitation is showing */
 .frame .text { z-index: 2; }
+.frame.is-through { --d0: 1s; }
 .frame.is-opening .text > *, .frame.is-opening .cue { opacity: 0; }
-.frame.is-card .eyebrow { animation: fadeUp .9s ease-out .9s both; }
-.frame.is-card .names .n1 { animation: wipe 1.2s cubic-bezier(.4, 0, .2, 1) 1.5s both; }
-.frame.is-card .names .amp { animation: fadeIn .7s ease-out 2.4s both; }
-.frame.is-card .names .n2 { animation: wipe 1.2s cubic-bezier(.4, 0, .2, 1) 2.7s both; }
-.frame.is-card .lead { animation: fadeUp .8s ease-out 3.9s both; }
-.frame.is-card .occasion { animation: textPop 1s cubic-bezier(.2, .9, .3, 1.2) 4.3s both; }
-.frame.is-card .when { animation: fadeUp .8s ease-out 4.9s both; }
+.frame.is-card .eyebrow { animation: fadeUp .9s ease-out calc(var(--d0, 0s) + .9s) both; }
+.frame.is-card .names .n1 { animation: wipe 1.2s cubic-bezier(.4, 0, .2, 1) calc(var(--d0, 0s) + 1.5s) both; }
+.frame.is-card .names .amp { animation: fadeIn .7s ease-out calc(var(--d0, 0s) + 2.4s) both; }
+.frame.is-card .names .n2 { animation: wipe 1.2s cubic-bezier(.4, 0, .2, 1) calc(var(--d0, 0s) + 2.7s) both; }
+.frame.is-card .lead { animation: fadeUp .8s ease-out calc(var(--d0, 0s) + 3.9s) both; }
+.frame.is-card .occasion { animation: textPop 1s cubic-bezier(.2, .9, .3, 1.2) calc(var(--d0, 0s) + 4.3s) both; }
+.frame.is-card .when { animation: fadeUp .8s ease-out calc(var(--d0, 0s) + 4.9s) both; }
 
 /* a small pointer to the reply form further down */
 .cue {
@@ -350,15 +445,38 @@ footer { text-align: center; padding: 30px 20px 56px; }
   opacity: 0;
 }
 .cue::after { content: "\2193"; display: inline-block; margin-left: .45em; animation: nudge 1.6s ease-in-out infinite; }
-.frame.is-card .cue { animation: fadeIn .9s ease-out 6.3s both; }
+.frame.is-card .cue { animation: fadeIn .9s ease-out calc(var(--d0, 0s) + 6.3s) both; }
+
+/* a small button to watch the opening again */
+.replay {
+  position: absolute; right: 3%; top: 1.6%; z-index: 2;
+  min-height: 40px; padding: 0 1em;
+  border: 0; border-radius: 999px;
+  background: rgba(255, 250, 244, .72);
+  box-shadow: 0 2px 8px rgba(80, 30, 45, .16);
+  color: var(--rose-deep); font: inherit; font-weight: 700; white-space: nowrap; cursor: pointer;
+  font-size: 12px; font-size: max(12px, 3.1cqw);
+  opacity: 0; visibility: hidden;
+}
+.replay::before { content: "\21BB"; margin-right: .4em; }
+.frame.is-card .replay { opacity: 1; visibility: visible; transition: opacity .9s ease; }
+.frame.is-through .replay { transition-delay: 8.6s; }
+
+/* people who have seen the opening before, or who ask their phone for less motion,
+   get the finished invitation straight away */
+.frame.is-seen .text *, .frame.is-still .text *,
+.frame.is-seen .cue, .frame.is-still .cue { animation: none !important; opacity: 1; }
+.frame.is-still .cue::after, .frame.is-still .glows i, .frame.is-still .glows::after { animation: none !important; }
+.frame.is-still .replay { display: none; }
+
+/* used for an instant while the opening is put back to its start */
+.frame.no-move, .frame.no-move * { transition: none !important; }
 
 /* save battery: stop the endless motion while the artwork is off screen */
-.frame.is-offscreen *, .frame.is-offscreen { animation-play-state: paused !important; }
+.frame.is-offscreen *, .frame.is-offscreen *::after { animation-play-state: paused !important; }
 
-/* people who ask their phone for less motion get the finished invitation, standing still */
-.frame.is-still .text > *, .frame.is-still .cue, .frame.is-still .cue::after { animation: none !important; opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
-  .frame *, .frame *::after { animation: none !important; }
+  .frame *, .frame *::after { animation: none !important; transition: none !important; }
   .frame .text > *, .frame .cue { opacity: 1; }
-  .opening { display: none; }
+  .opening, .light, .replay { display: none; }
 }

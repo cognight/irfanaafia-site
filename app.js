@@ -135,12 +135,35 @@
     });
   }
 
+  // Put the guest's name on the invitation: "Dear Rahman Family".
+  function greet(name) {
+    var film = $("film");
+    var eyebrow = film && film.querySelector(".eyebrow"), lead = film && film.querySelector(".lead");
+    if (!eyebrow || !lead || !name) return;
+    var who = "Dear " + String(name).replace(/^the\s+/i, "");
+    eyebrow.textContent = who;
+    eyebrow.classList.add("is-name");
+    film.classList.add("has-name");
+    // add "together with our families" as an extra line, unless the name is long
+    // enough to need two lines itself (the words must stay clear of the couple)
+    lead.textContent = "";
+    lead.appendChild(document.createTextNode("together with our families"));
+    lead.appendChild(document.createElement("br"));
+    lead.appendChild(document.createTextNode("invite you to celebrate our"));
+    function fit() {
+      var line = parseFloat(getComputedStyle(eyebrow).lineHeight) || 16;
+      if (eyebrow.offsetHeight > line * 1.6) lead.textContent = "invite you to celebrate our";
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit); else fit();
+  }
+
   function start() {
     code = (new URLSearchParams(window.location.search).get("i") || "").trim();
     if (!/^[A-Za-z0-9]{4,24}$/.test(code)) { show("lost"); return; }
     api("get", { code: code }).then(function (r) {
       if (!r.ok) { show("lost"); return; }
       household = r.household;
+      greet(household.display);
       saved = r.response;
       open = r.open;
       if (saved) { renderDone(); show("done"); }
@@ -275,47 +298,76 @@
   start();
 })();
 
-// The invitation film: the opening scene plays once, then fades into the invitation card.
-// The card keeps moving gently, but only while it is on screen (saves battery).
+// The invitation film: the opening scene plays once, then we walk through the gateway
+// into the invitation. The invitation keeps moving gently, but only while it is on screen
+// (saves battery). People who have seen the opening before go straight to the invitation.
 (function () {
   var frame = document.getElementById("film");
   if (!frame) return;
   var card = frame.querySelector(".scene-card");
   var opening = frame.querySelector(".scene-open");
+  var replay = frame.querySelector(".replay");
   var still = frame.classList.contains("is-still"); // this phone asked for less motion
   var OPENING_SECONDS = 5.6; // how long the opening scene shows before the invitation
-  var showingCard = still, onScreen = true;
+  var showingCard = !frame.classList.contains("is-opening");
+  var onScreen = true, timers = [];
 
   function play(v) {
     var p = v.play();
     return (p && p.then) ? p : Promise.resolve();
   }
+  function quiet() {}
 
   function showCard() {
     if (showingCard) return;
     showingCard = true;
+    timers.forEach(clearTimeout);
+    timers = [];
     frame.classList.remove("is-opening");
-    frame.classList.add("is-card");
-    if (onScreen) play(card).catch(function () {});
-    setTimeout(function () { opening.pause(); }, 1600);
+    frame.classList.add("is-card", "is-through");
+    if (onScreen) play(card).catch(quiet);
+    setTimeout(function () { if (showingCard) opening.pause(); }, 1700);
+    try { localStorage.setItem("filmSeen", "1"); } catch (e) {}
+  }
+
+  function startOpening() {
+    showingCard = false;
+    // put everything back to the start in one go, without the slow glide playing backwards
+    frame.classList.add("no-move");
+    frame.classList.remove("is-card", "is-through", "is-seen", "is-pushing");
+    frame.classList.add("is-opening");
+    void frame.offsetWidth;
+    frame.classList.remove("no-move");
+    card.pause();
+    try { opening.currentTime = 0; } catch (e) {}
+    play(opening).then(function () {
+      if (!showingCard) frame.classList.add("is-pushing"); // the camera starts to glide in
+    }).catch(showCard); // phones that will not play video go straight to the invitation
+    timers.push(setTimeout(function () { if (opening.currentTime < 0.2) showCard(); }, 4000)); // slow connection
+    timers.push(setTimeout(showCard, 12000));
   }
 
   if (!still) {
     opening.addEventListener("timeupdate", function () {
-      if (opening.currentTime >= OPENING_SECONDS) showCard();
+      if (!showingCard && opening.currentTime >= OPENING_SECONDS) showCard();
     });
     opening.addEventListener("ended", showCard);
     frame.querySelector(".opening").addEventListener("click", showCard); // a tap skips ahead
-    play(opening).catch(showCard); // phones that will not play video go straight to the invitation
-    setTimeout(function () { if (opening.currentTime < 0.2) showCard(); }, 4000); // slow connection
-    setTimeout(showCard, 12000);
+    if (replay) replay.addEventListener("click", function () {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      startOpening();
+    });
+    if (!showingCard) startOpening();
   }
 
-  if (!("IntersectionObserver" in window)) return;
+  if (!("IntersectionObserver" in window)) {
+    if (!still && showingCard) play(card).catch(quiet);
+    return;
+  }
   new IntersectionObserver(function (entries) {
     onScreen = entries[0].isIntersecting;
     frame.classList.toggle("is-offscreen", !onScreen);
     if (still || !showingCard) return;
-    if (onScreen) play(card).catch(function () {}); else card.pause();
+    if (onScreen) play(card).catch(quiet); else card.pause();
   }).observe(frame);
 })();
