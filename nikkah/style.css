@@ -53,6 +53,8 @@ body {
   right: 26%;
   top: 20.4%;
   text-align: center;
+  /* a soft ivory halo keeps the words readable when a red petal drifts behind them */
+  text-shadow: 0 0 .9cqw #FFF6E6, 0 0 2cqw rgba(255, 246, 230, .9);
 }
 
 .bismillah {
