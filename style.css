@@ -49,9 +49,9 @@ body {
 /* the words sit on the plain panel inside the arch, above the couple */
 .frame .text {
   position: absolute;
-  left: 27%;
-  right: 27%;
-  top: 19.2%;
+  left: 26%;
+  right: 26%;
+  top: 19.8%;
   text-align: center;
 }
 
@@ -115,11 +115,11 @@ body {
   margin-right: auto;
   text-wrap: balance;
 }
-.frame.has-name .text { top: 19.7%; }
+.frame.has-name .text { top: 19.8%; }
 .frame.has-name .names { font-size: 36px; font-size: 10cqw; }
 .frame.has-name .lead { line-height: 1.3; }
 
-.when { margin: .4cqw 0 0; font-weight: 700; line-height: 1.3; font-size: 14px; font-size: max(13px, 3.8cqw); }
+.when { margin: .6cqw 0 0; font-weight: 700; line-height: 1.3; white-space: nowrap; font-size: 13px; font-size: max(12.5px, 3.35cqw); }
 
 main { max-width: 560px; margin: 0 auto; padding: 8px 18px 8px; }
 
@@ -332,8 +332,8 @@ footer { text-align: center; padding: 26px 20px 60px; }
 }
 
 /* ---------- the invitation film ---------- */
-/* Scene one (the opening) plays once on top of the invitation. We then walk through the
-   gateway: the camera pushes in, its light fills the screen, and the invitation appears. */
+/* Scene one (the opening) plays once on top of the invitation. The camera then moves up to
+   the gateway and the opening melts into the invitation, which is the same gateway up close. */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes wipe { from { clip-path: inset(-20% 100% -20% -8%); } to { clip-path: inset(-20% -8% -20% -8%); } }
@@ -344,24 +344,15 @@ footer { text-align: center; padding: 26px 20px 60px; }
   position: absolute; inset: 0; z-index: 3;
   background: #4A2F36;
   opacity: 0; visibility: hidden;
-  transition: opacity .9s ease .35s, visibility 0s linear 1.3s;
+  transition: opacity 1.9s ease-in-out .1s, visibility 0s linear 2.1s;
 }
 .frame.is-opening .opening { opacity: 1; visibility: visible; transition: none; }
 
-/* the camera glides slowly toward the gateway, then rushes through it */
-.scene-open { transform-origin: 50% 39%; transition: transform 7s cubic-bezier(.3, 0, .8, 1); }
-.frame.is-pushing .scene-open { transform: scale(1.16); }
-.frame.is-through .scene-open { transform: scale(2.7); transition: transform 1.3s cubic-bezier(.6, 0, .9, .55); }
-
-/* the light of the gateway fills the screen, then clears to show the invitation */
-.light {
-  position: absolute; inset: 0; z-index: 4; pointer-events: none; opacity: 0;
-  background: radial-gradient(circle at 50% 39%, #FFFBF1 0, #FDEFD8 55%, #F6DFC6 100%);
-}
-.frame.is-through .light { animation: through 2.3s ease-in-out both; }
-@keyframes through { 0% { opacity: 0; } 40% { opacity: 1; } 56% { opacity: 1; } 100% { opacity: 0; } }
-.frame.is-through .scene-card { animation: arrive 2.6s cubic-bezier(.16, .7, .2, 1) .8s both; }
-@keyframes arrive { from { transform: scale(1.12); } to { transform: none; } }
+/* the camera glides slowly toward the gateway, then eases right up to it */
+.scene-open { transform-origin: 50% 62%; transition: transform 7s cubic-bezier(.3, 0, .8, 1); }
+.frame.is-pushing .scene-open { transform: scale(1.05); }
+/* (the couple stay where they are on screen while the gateway grows behind them) */
+.frame.is-through .scene-open { transform: translateY(9%) scale(1.04); transition: transform 2.4s cubic-bezier(.4, 0, .3, 1); }
 
 /* a soft glow behind the initials so they read over the scene */
 .opening::after {
@@ -395,7 +386,7 @@ footer { text-align: center; padding: 26px 20px 60px; }
 /* candlelight: a warm glow over each lantern that flickers, and a slow shimmer across the scene */
 .glows { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity 1.6s ease; }
 .frame.is-card .glows { opacity: 1; }
-.frame.is-through .glows { transition-delay: 2.4s; }
+.frame.is-through .glows { transition-delay: 1.8s; }
 .glows i {
   position: absolute; left: var(--x); top: var(--y);
   width: 20cqw; height: 20cqw; margin: -10cqw 0 0 -10cqw; border-radius: 50%;
@@ -412,6 +403,13 @@ footer { text-align: center; padding: 26px 20px 60px; }
   71% { opacity: .96; transform: scale(1.04); }
   86% { opacity: .56; transform: scale(.92); }
 }
+/* the light in the gateway slowly brightens and dims */
+.glows::before {
+  content: ""; position: absolute; left: 14%; right: 14%; top: 10%; height: 62%; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 250, 235, .6) 0, rgba(255, 246, 225, .25) 45%, rgba(255, 244, 220, 0) 72%);
+  animation: breathe 7s ease-in-out infinite;
+}
+@keyframes breathe { 0%, 100% { opacity: .15; } 50% { opacity: 1; } }
 .glows::after {
   content: ""; position: absolute; top: -20%; left: 0; width: 46%; height: 140%;
   background: linear-gradient(90deg, rgba(255, 244, 220, 0), rgba(255, 244, 220, .34) 50%, rgba(255, 244, 220, 0));
@@ -420,6 +418,33 @@ footer { text-align: center; padding: 26px 20px 60px; }
   animation: shimmer 11s ease-in-out 4s infinite;
 }
 @keyframes shimmer { 0% { transform: translateX(-140%) skewX(-14deg); } 38%, 100% { transform: translateX(340%) skewX(-14deg); } }
+
+/* rose petals drift down, and tiny lights twinkle among the flowers */
+.petals { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity 1.6s ease; }
+.frame.is-card .petals { opacity: 1; }
+.frame.is-through .petals { transition-delay: 1.2s; }
+.petals b {
+  position: absolute; left: var(--x); top: -6cqw;
+  width: var(--s); height: calc(var(--s) * .76);
+  border-radius: 85% 12% 85% 12%;
+  background: linear-gradient(135deg, #F6C3CC, #D7738C);
+  box-shadow: inset -.3cqw -.2cqw .5cqw rgba(150, 50, 80, .25);
+  animation: fall var(--t) linear var(--dl) infinite;
+}
+@keyframes fall {
+  0% { transform: translate(0, 0) rotate(0); }
+  25% { transform: translate(var(--w), 48cqw) rotate(130deg); }
+  50% { transform: translate(calc(var(--w) * -.6), 96cqw) rotate(230deg); }
+  75% { transform: translate(var(--w), 144cqw) rotate(340deg); }
+  100% { transform: translate(calc(var(--w) * .3), 192cqw) rotate(440deg); }
+}
+.petals u {
+  position: absolute; left: var(--x); top: var(--y);
+  width: 2.2cqw; height: 2.2cqw; margin: -1.1cqw 0 0 -1.1cqw; border-radius: 50%;
+  background: radial-gradient(circle, #FFFDF2 0, rgba(255, 236, 170, .85) 28%, rgba(255, 220, 140, 0) 70%);
+  animation: twinkle var(--t) ease-in-out var(--dl) infinite;
+}
+@keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(.3); } 50% { opacity: 1; transform: scale(1); } }
 
 /* the words of the invitation appear line by line once the invitation is showing */
 .frame .text { z-index: 2; }
@@ -466,17 +491,18 @@ footer { text-align: center; padding: 26px 20px 60px; }
    get the finished invitation straight away */
 .frame.is-seen .text *, .frame.is-still .text *,
 .frame.is-seen .cue, .frame.is-still .cue { animation: none !important; opacity: 1; }
-.frame.is-still .cue::after, .frame.is-still .glows i, .frame.is-still .glows::after { animation: none !important; }
+.frame.is-still .cue::after, .frame.is-still .glows i, .frame.is-still .glows::before, .frame.is-still .glows::after { animation: none !important; }
+.frame.is-still .petals { display: none; }
 .frame.is-still .replay { display: none; }
 
 /* used for an instant while the opening is put back to its start */
 .frame.no-move, .frame.no-move * { transition: none !important; }
 
 /* save battery: stop the endless motion while the artwork is off screen */
-.frame.is-offscreen *, .frame.is-offscreen *::after { animation-play-state: paused !important; }
+.frame.is-offscreen *, .frame.is-offscreen *::before, .frame.is-offscreen *::after { animation-play-state: paused !important; }
 
 @media (prefers-reduced-motion: reduce) {
   .frame *, .frame *::after { animation: none !important; transition: none !important; }
   .frame .text > *, .frame .cue { opacity: 1; }
-  .opening, .light, .replay { display: none; }
+  .opening, .replay, .petals { display: none; }
 }

@@ -18,24 +18,38 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=Nunito+Sans:wght@400;600;700&family=Pinyon+Script&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
   <header class="hero">
     <div class="frame" id="film">
-      <!-- the invitation card: a looping scene with the words on top -->
-      <video class="art scene-card" muted loop playsinline preload="auto" poster="scene2.jpg?v=8" aria-hidden="true" tabindex="-1" disablepictureinpicture>
-        <source src="scene2.mp4?v=8" type="video/mp4">
-      </video>
+      <!-- the invitation: the same gateway, seen up close, with the words in its opening -->
+      <img class="art scene-card" src="scene2.jpg?v=9" alt="" aria-hidden="true">
 
-      <!-- warm candlelight over the lanterns, and a soft shimmer -->
+      <!-- candlelight, a soft glow in the gateway, drifting petals and sparkles -->
       <div class="glows" aria-hidden="true">
-        <i style="--x:5.6%;--y:41.1%;--t:2.9s;--dl:-.4s"></i>
-        <i style="--x:94.4%;--y:42.6%;--t:3.4s;--dl:-1.7s"></i>
-        <i style="--x:5.3%;--y:85.5%;--t:2.6s;--dl:-1.1s"></i>
-        <i style="--x:12.9%;--y:85.5%;--t:3.1s;--dl:-2.2s"></i>
-        <i style="--x:88.7%;--y:85.1%;--t:2.8s;--dl:-.9s"></i>
-        <i style="--x:95.7%;--y:85.1%;--t:3.3s;--dl:-2.6s"></i>
+        <i style="--x:90.4%;--y:16.8%;--t:2.9s;--dl:-.4s"></i>
+      </div>
+      <div class="petals" aria-hidden="true">
+        <b style="--x:8%;--s:3.4cqw;--w:9cqw;--t:11s;--dl:-1s"></b>
+        <b style="--x:21%;--s:2.6cqw;--w:-7cqw;--t:14s;--dl:-8s"></b>
+        <b style="--x:34%;--s:3cqw;--w:8cqw;--t:12.5s;--dl:-4.5s"></b>
+        <b style="--x:47%;--s:2.4cqw;--w:-10cqw;--t:15s;--dl:-11s"></b>
+        <b style="--x:59%;--s:3.2cqw;--w:7cqw;--t:11.5s;--dl:-6.5s"></b>
+        <b style="--x:71%;--s:2.6cqw;--w:-8cqw;--t:13.5s;--dl:-2.5s"></b>
+        <b style="--x:83%;--s:3cqw;--w:9cqw;--t:12s;--dl:-9.5s"></b>
+        <b style="--x:93%;--s:2.4cqw;--w:-6cqw;--t:16s;--dl:-13s"></b>
+        <u style="--x:12%;--y:9%;--t:3.1s;--dl:-.6s"></u>
+        <u style="--x:27%;--y:5%;--t:4.2s;--dl:-2.1s"></u>
+        <u style="--x:44%;--y:8%;--t:3.6s;--dl:-1.3s"></u>
+        <u style="--x:63%;--y:6%;--t:4.5s;--dl:-3.2s"></u>
+        <u style="--x:79%;--y:10%;--t:3.3s;--dl:-.2s"></u>
+        <u style="--x:7%;--y:31%;--t:4.8s;--dl:-2.7s"></u>
+        <u style="--x:93%;--y:37%;--t:3.9s;--dl:-1.8s"></u>
+        <u style="--x:10%;--y:58%;--t:4.4s;--dl:-3.6s"></u>
+        <u style="--x:90%;--y:63%;--t:3.4s;--dl:-.9s"></u>
+        <u style="--x:17%;--y:81%;--t:4.1s;--dl:-2.4s"></u>
+        <u style="--x:86%;--y:84%;--t:3.7s;--dl:-1.1s"></u>
       </div>
 
       <div class="text">
@@ -43,7 +57,7 @@
         <h1 class="names"><span class="n1">Irfan</span> <span class="amp">&amp;</span> <span class="n2">Aafia</span></h1>
         <p class="lead">invite you to celebrate our</p>
         <p class="occasion">Walima</p>
-        <p class="when">Monday<br>January 11, 2027</p>
+        <p class="when">Monday, January 11, 2027</p>
       </div>
 
       <p class="cue" aria-hidden="true">Reply below</p>
@@ -51,14 +65,12 @@
 
       <!-- the opening scene: plays once, then fades into the invitation -->
       <div class="opening" aria-hidden="true">
-        <video class="art scene-open" muted playsinline preload="auto" poster="scene1.jpg?v=8" tabindex="-1" disablepictureinpicture>
-          <source src="scene1.mp4?v=8" type="video/mp4">
+        <video class="art scene-open" muted playsinline preload="auto" poster="scene1.jpg?v=9" tabindex="-1" disablepictureinpicture>
+          <source src="scene1.mp4?v=9" type="video/mp4">
         </video>
         <p class="monogram"><span class="mono-i">I</span><span class="mono-amp">&amp;</span><span class="mono-a">A</span></p>
       </div>
 
-      <!-- the light of the gateway, as we walk through it into the invitation -->
-      <div class="light" aria-hidden="true"></div>
     </div>
     <script>
       // Start with the opening scene. Skip it for people who have already seen it,
@@ -81,8 +93,8 @@
     </section>
 
     <section id="view-lost" class="card" hidden>
-      <h2>We could not open your invitation</h2>
-      <p class="help">Please use the personal link that Irfan and Aafia sent you. If it still does not work, please contact them directly.</p>
+      <h2>Please open your personal link</h2>
+      <p class="help">To reply, use the link that Irfan and Aafia sent you. It opens your own invitation and saves your answer. If it does not work, please contact them directly.</p>
     </section>
 
     <section id="view-form" class="card" hidden>
@@ -117,7 +129,7 @@
     <p class="sign">With love, Irfan <span class="amp">&amp;</span> Aafia</p>
   </footer>
 
-  <script src="config.js?v=8"></script>
-  <script src="app.js?v=8"></script>
+  <script src="config.js?v=9"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>

@@ -313,6 +313,7 @@
   var onScreen = true, timers = [];
 
   function play(v) {
+    if (!v.play) return Promise.resolve(); // the invitation is a still picture; the page moves it
     var p = v.play();
     return (p && p.then) ? p : Promise.resolve();
   }
@@ -326,7 +327,7 @@
     frame.classList.remove("is-opening");
     frame.classList.add("is-card", "is-through");
     if (onScreen) play(card).catch(quiet);
-    setTimeout(function () { if (showingCard) opening.pause(); }, 1700);
+    setTimeout(function () { if (showingCard) opening.pause(); }, 2300);
     try { localStorage.setItem("filmSeen", "1"); } catch (e) {}
   }
 
@@ -338,7 +339,7 @@
     frame.classList.add("is-opening");
     void frame.offsetWidth;
     frame.classList.remove("no-move");
-    card.pause();
+    (card.pause && card.pause());
     try { opening.currentTime = 0; } catch (e) {}
     play(opening).then(function () {
       if (!showingCard) frame.classList.add("is-pushing"); // the camera starts to glide in
@@ -368,6 +369,6 @@
     onScreen = entries[0].isIntersecting;
     frame.classList.toggle("is-offscreen", !onScreen);
     if (still || !showingCard) return;
-    if (onScreen) play(card).catch(quiet); else card.pause();
+    if (onScreen) play(card).catch(quiet); else (card.pause && card.pause());
   }).observe(frame);
 })();
