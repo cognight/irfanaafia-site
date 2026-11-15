@@ -382,9 +382,28 @@ details.cal .cal-links a {
 }
 .tile b { font-family: "Lora", Georgia, serif; font-weight: 600; font-size: 22px; line-height: 1.2; color: var(--sage-deep); }
 .tile span { font-size: 17px; font-weight: 700; }
-.tile em { margin-top: 8px; padding: 6px 12px; border-radius: 999px; font-style: normal; font-weight: 700; font-size: 15px; line-height: 1.2; color: var(--muted); }
+.tile em { font-style: normal; font-weight: 700; line-height: 1.2; color: var(--muted); }
 a.tile { background: #fff; border-color: var(--gold); }
+/* the button on the other event's tile looks like the page's main button */
+.tile em { align-self: stretch; margin-top: 10px; padding: 11px 6px; border-radius: 12px; font-size: 16px; }
 a.tile em { background: var(--sage-deep); color: #fff; }
+a.tile:active em { filter: brightness(.9); }
+
+/* the other invitation opens on top of this page and plays from its opening */
+html.has-overlay, html.has-overlay body { overflow: hidden; }
+.overlay { position: fixed; inset: 0; z-index: 50; background: #3A0C15; animation: overlayIn .45s cubic-bezier(.2, .8, .2, 1) both; }
+.overlay iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+.overlay-close {
+  position: absolute; left: 12px; top: calc(10px + env(safe-area-inset-top, 0px)); z-index: 1;
+  min-height: 40px; padding: 0 1em 0 .8em;
+  border: 0; border-radius: 999px;
+  background: rgba(255, 250, 244, .92);
+  box-shadow: 0 2px 10px rgba(80, 30, 45, .3);
+  color: var(--rose-deep); font: inherit; font-weight: 700; font-size: 14px; white-space: nowrap; cursor: pointer;
+}
+.overlay-close::before { content: "\2039"; margin-right: .45em; font-size: 1.25em; line-height: 1; }
+@keyframes overlayIn { from { opacity: 0; transform: translateY(5%); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .overlay { animation: none; } }
 /* after replying, a reminder that the other event needs its own reply */
 .next-event { margin: 18px 0 4px; padding: 16px 14px; background: #FBF3E6; border: 1px solid var(--line); border-radius: 16px; text-align: center; }
 .next-event p { margin: 0; font-weight: 700; }
@@ -553,6 +572,20 @@ footer { text-align: center; padding: 26px 20px 60px; }
 }
 .cue::after { content: "\2193"; display: inline-block; margin-left: .45em; animation: nudge 1.6s ease-in-out infinite; }
 .frame.is-card .cue { animation: fadeIn .9s ease-out calc(var(--d0, 0s) + 7.2s) both; }
+
+/* a small pill to skip the opening (a tap anywhere on the picture does the same) */
+.skip {
+  position: absolute; right: 3%; top: 1.6%; z-index: 2;
+  display: flex; align-items: center; min-height: 40px; padding: 0 1em;
+  border-radius: 999px;
+  background: rgba(255, 250, 244, .72);
+  box-shadow: 0 2px 8px rgba(80, 30, 45, .16);
+  color: var(--rose-deep); font-weight: 700; white-space: nowrap; cursor: pointer;
+  font-size: 12px; font-size: max(12px, 3.1cqw);
+  opacity: 0;
+}
+.skip::after { content: "\203A"; margin-left: .4em; font-size: 1.2em; line-height: 1; }
+.frame.is-opening .skip { animation: fadeIn .8s ease-out 1.6s both; }
 
 /* a small button to watch the opening again */
 .replay {

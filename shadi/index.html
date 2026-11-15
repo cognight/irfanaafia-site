@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Aref+Ruqaa&family=Lora:wght@500;600&family=Nunito+Sans:wght@400;600;700&family=Pinyon+Script&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=10">
+  <link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
   <header class="hero">
@@ -60,16 +60,16 @@
           <source src="open.mp4?v=4" type="video/mp4">
         </video>
         <p class="monogram"><span class="mono-i">I</span><span class="mono-amp">&amp;</span><span class="mono-a">A</span></p>
+        <span class="skip">Skip</span>
       </div>
     </div>
     <script>
-      // Start with the opening. Skip it for people who have already seen it,
+      // Start with the opening. It plays every time the page is opened (a tap skips it),
       // and show the still invitation when this phone asks for less motion.
       (function () {
-        var film = document.getElementById("film"), seen = false;
+        var film = document.getElementById("film");
         var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        try { seen = localStorage.getItem("nikkahFilmSeen") === "1"; } catch (e) {}
-        film.className += calm ? " is-card is-still" : seen ? " is-card is-seen" : " is-opening";
+        film.className += calm ? " is-card is-still" : " is-opening";
       })();
     </script>
   </header>
@@ -124,7 +124,7 @@
     <p class="sign">With love, Irfan <span class="amp">&amp;</span> Aafia</p>
   </footer>
 
-  <script src="config.js?v=10"></script>
-  <script src="app.js?v=10"></script>
+  <script src="config.js?v=11"></script>
+  <script src="app.js?v=11"></script>
 </body>
 </html>

@@ -6,6 +6,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var VIEWS = ["loading", "lost", "form", "done", "closed"];
   var OTHER = CFG.otherEvents || {}; // the other event's name, date and address, for families invited to both
+  var EMBED = /[?&]embed=1(&|$)/.test(window.location.search); // true when this page is showing on top of the other invitation
 
   var code = "";        // the household's code from their link, for example rizwan-chacha
   var household = null; // { display, code, people: [{ id, name, ask, coming }], also }
@@ -180,14 +181,56 @@
   }
 
   // A family invited to both events sees both, side by side, right under the picture.
-  function otherLink() {
+  function otherLink(embed) {
     var o = OTHER[household.also];
-    return o ? o.path + "?i=" + encodeURIComponent(household.code || code) : "";
+    return o ? o.path + "?i=" + encodeURIComponent(household.code || code) + (embed ? "&embed=1" : "") : "";
   }
+
+  // The other invitation opens on top of this page and plays from its opening.
+  // Closing it (the Back pill, the phone's Back, or Esc) returns to this page as it was.
+  var overlay = null;
+  function openOther(e) {
+    var o = OTHER[household.also];
+    if (!o) return;
+    if (e) e.preventDefault();
+    if (overlay) return;
+    overlay = el("div", "overlay");
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", o.name + " invitation");
+    var page = document.createElement("iframe");
+    page.src = otherLink(true);
+    page.title = o.name + " invitation";
+    page.setAttribute("allow", "autoplay");
+    overlay.appendChild(page);
+    var back = el("button", "overlay-close", "Back to the " + eventById(EVENT).name);
+    back.type = "button";
+    back.addEventListener("click", closeOther);
+    overlay.appendChild(back);
+    document.body.appendChild(overlay);
+    document.documentElement.classList.add("has-overlay");
+    try { history.pushState({ overlay: true }, ""); } catch (err) {}
+  }
+  function removeOverlay() {
+    if (!overlay) return;
+    overlay.parentNode.removeChild(overlay);
+    overlay = null;
+    document.documentElement.classList.remove("has-overlay");
+  }
+  function closeOther() {
+    if (!overlay) return;
+    if (history.state && history.state.overlay) history.back(); // the Back handler below removes it
+    else removeOverlay();
+  }
+  window.addEventListener("popstate", removeOverlay);
+  window.addEventListener("keydown", function (e) { if (e.key === "Escape") closeOther(); });
+  window.addEventListener("message", function (e) {
+    if (e.origin === window.location.origin && e.data === "close-invitation") closeOther();
+  });
 
   function showAlso() {
     var o = OTHER[household.also], box = $("both-events"), here = eventById(EVENT);
-    if (!o || !box) return;
+    if (!o || !box || EMBED) return; // inside the overlay, the Back pill is the way back
     function tile(tag, name, date, note) {
       var t = el(tag, "tile");
       t.appendChild(el("b", null, name));
@@ -199,6 +242,7 @@
     mine.className += " is-here";
     var theirs = tile("a", o.name, o.shortDate || "", "Open invitation");
     theirs.href = otherLink();
+    theirs.addEventListener("click", openOther);
     var tiles = box.querySelector(".both-tiles");
     tiles.textContent = "";
     // earliest event first
@@ -370,11 +414,18 @@
 
     // invited to both events: remind them the other one needs its own reply
     var other = OTHER[household.also];
-    if (other) {
+    if (other && EMBED) {
+      // shown inside the other invitation: one button to go back to it
+      var back = el("button", "btn primary", "Back to the " + other.name + " invitation");
+      back.type = "button";
+      back.addEventListener("click", function () { window.parent.postMessage("close-invitation", window.location.origin); });
+      extra.appendChild(back);
+    } else if (other) {
       var next = el("div", "next-event");
       next.appendChild(el("p", null, "One more: you are also invited to our " + other.name + ". Please reply there too."));
       var go = el("a", "btn primary", "Reply for the " + other.name);
       go.href = otherLink();
+      go.addEventListener("click", openOther);
       next.appendChild(go);
       extra.appendChild(next);
     }
