@@ -328,7 +328,7 @@
   var custom = false; // true while the family is choosing person by person
 
   // An answer is saved the moment it is tapped: nobody has to press "Send my reply" for it to count.
-  var saveTimer = null, saveSeq = 0;
+  var saveTimer = null, saveSeq = 0, inFlight = null, saveAgain = false;
   function buildPeople() {
     return draft.map(function (d) {
       return { id: d.id, coming: choice === false ? false : (custom ? d.coming : true), name: custom ? d.name.trim() : "" };
@@ -337,19 +337,28 @@
   function autosave() {
     if (choice === null || !open) return;
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(function () {
-      var seq = ++saveSeq, note = $("save-note");
-      function say(text, cls) { if (note) { note.textContent = text; note.className = "save-note" + (cls ? " " + cls : ""); note.hidden = false; } }
-      say("Saving\u2026");
-      api("submit", { code: code, people: buildPeople(), message: $("message").value.trim() }).then(function (r) {
-        if (seq !== saveSeq) return; // a newer answer is already on its way
-        if (!r.ok) { say(r.error === "closed" ? "Sorry, replies have closed." : "That did not save. Please tap Send my reply.", "is-error"); return; }
-        take(r);
-        say(choice ? "Saved. We look forward to seeing you." : "Saved. You will be missed.", "is-saved");
-      }).catch(function () {
-        if (seq === saveSeq) say("That did not save. Please check your internet and tap Send my reply.", "is-error");
-      });
-    }, 500);
+    saveTimer = setTimeout(sendSave, 500);
+  }
+  // Saves go one at a time. If the guest changes their mind while one is on its way, the newest
+  // answer is sent as soon as that one finishes, so the last tap is always the one that is kept.
+  function sendSave() {
+    if (inFlight) { saveAgain = true; return; }
+    saveAgain = false;
+    var seq = ++saveSeq, note = $("save-note");
+    function say(text, cls) { if (note) { note.textContent = text; note.className = "save-note" + (cls ? " " + cls : ""); note.hidden = false; } }
+    function latest() { return seq === saveSeq && !saveAgain; }
+    say("Saving\u2026");
+    inFlight = api("submit", { code: code, people: buildPeople(), message: $("message").value.trim() }).then(function (r) {
+      if (!latest()) return;
+      if (!r.ok) { say(r.error === "closed" ? "Sorry, replies have closed." : "That did not save. Please tap Send my reply.", "is-error"); return; }
+      take(r);
+      say(choice ? "Saved. We look forward to seeing you." : "Saved. You will be missed.", "is-saved");
+    }).catch(function () {
+      if (latest()) say("That did not save. Please check your internet and tap Send my reply.", "is-error");
+    }).then(function () {
+      inFlight = null;
+      if (saveAgain) sendSave();
+    });
   }
   $("message").addEventListener("change", autosave);
 
@@ -461,11 +470,13 @@
     showError("form-error");
     if (choice === null) { showError("form-error", "Please tap Attending or Not attending."); return; }
     clearTimeout(saveTimer);
-    saveSeq++; // this full send replaces any quiet save still on its way
-    var people = buildPeople();
+    saveSeq++; saveAgain = false; // this full send replaces any quiet save, and goes after one still on its way
+    var people = buildPeople(), text = $("message").value.trim();
     var btn = $("send-btn");
     busy(btn, true, "Sending...");
-    api("submit", { code: code, people: people, message: $("message").value.trim() }).then(function (r) {
+    (inFlight || Promise.resolve()).then(function () {
+      return api("submit", { code: code, people: people, message: text });
+    }).then(function (r) {
       if (!r.ok) {
         showError("form-error", r.error === "closed"
           ? "Sorry, replies have closed. Please contact Irfan or Aafia directly."
