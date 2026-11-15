@@ -23,14 +23,16 @@ window.SITE = {
       // the date as it is set out on the reply card (time: "" until it is known)
       dateParts: { weekday: "Tue", day: "5", month: "January", year: "2027", time: "at 5 pm" },
       timeText: "5:00 pm",
-      venue: "Venue to be announced",
-      address: "",
-      mapsUrl: "",    // a Google Maps link; the map button appears once this is filled in
-      // Calendar times in UTC, for example "20270109T190000Z". The calendar button appears once these are filled in.
+      venue: "The Blossom Events Centre",
+      address: "204 Cardinal Crescent, Saskatoon, SK S7L 6H8",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=The%20Blossom%20Events%20Centre%2C%20204%20Cardinal%20Crescent%2C%20Saskatoon%2C%20SK%20S7L%206H8",
+      // Calendar times in UTC. Saskatoon is 6 hours behind UTC all year, so 5:00 pm there is 23:00 UTC.
+      // End time is a 5 hour placeholder. (If the time changes, also update shadi.ics.)
       calendarTitle: "Irfan & Aafia's Shadi",
-      startUTC: "",
-      endUTC: "",
-      icsFile: ""
+      timeZone: "America/Regina", // Saskatoon's time zone
+      startUTC: "20270105T230000Z",
+      endUTC: "20270106T040000Z",
+      icsFile: "shadi.ics"
     }
   ]
 };

@@ -143,7 +143,7 @@
     return "https://calendar.google.com/calendar/render?action=TEMPLATE" +
       "&text=" + encodeURIComponent(ev.calendarTitle) +
       "&dates=" + ev.startUTC + "/" + ev.endUTC +
-      "&ctz=America%2FToronto" +
+      "&ctz=" + encodeURIComponent(ev.timeZone || "America/Toronto") +
       "&location=" + encodeURIComponent(ev.venue + ", " + ev.address);
   }
 
