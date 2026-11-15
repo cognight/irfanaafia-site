@@ -46,80 +46,102 @@ body {
 /* the animated card: a looping video, with a still picture shown until it loads */
 .frame .art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; pointer-events: none; }
 
-/* the words sit on the plain panel inside the arch, above the couple */
+/* The words sit on the plain panel inside the arch, above the couple.
+   Every size here is in cqw (1cqw = 1% of the picture's width), so the words keep
+   their place inside the arch on every phone. */
 .frame .text {
   position: absolute;
-  left: 26%;
-  right: 26%;
-  top: 19.8%;
+  left: 22.5%;
+  right: 22.5%;
+  top: 17.4%;
   text-align: center;
+  color: var(--ink);
+}
+.frame .text p { margin: 0; }
+
+.bism {
+  font-family: "Aref Ruqaa", "Amiri", "Geeza Pro", serif;
+  font-size: 4.5cqw; /* small enough to sit in the pointed top of the arch */
+  line-height: 1.25;
+  color: #A47E2C;
+}
+.bism-en {
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-size: 2.55cqw;
+  line-height: 1.25;
+  color: #8C6D2E;
 }
 
-.eyebrow {
-  margin: 0 0 1.2cqw;
-  font-size: 10px;
-  font-size: max(10px, 2.75cqw);
-  line-height: 1.3;
-  letter-spacing: .07em;
-  text-transform: uppercase;
+.frame .text .hosts {
+  margin-top: 1.3cqw;
+  font-family: "Lora", Georgia, serif;
+  font-weight: 600;
+  font-size: 4.3cqw;
+  line-height: 1.2;
+  letter-spacing: .02em;
+  color: var(--rose-deep);
+}
+.request, .daughter {
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-size: 3.1cqw;
+  line-height: 1.28;
+  color: #5A4A50;
+}
+.request { white-space: nowrap; }
+.occasion {
+  display: inline-block;
+  margin-left: .15em;
+  font-family: "Lora", Georgia, serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 4.3cqw;
+  line-height: 1.2;
+  letter-spacing: .03em;
   color: var(--sage-deep);
-  font-weight: 700;
 }
 
 .names {
-  margin: 0;
+  margin: .7cqw 0 0;
   font-family: "Pinyon Script", "Snell Roundhand", cursive;
   font-weight: 400;
-  font-size: 38px;
-  font-size: 10.6cqw;
-  line-height: 1;
+  font-size: 8.4cqw;
+  line-height: 1.02;
   white-space: nowrap;
   color: var(--rose-deep);
 }
 .names .n1, .names .n2, .names .amp { display: block; }
-.names .n1, .names .n2 { padding: .08em 0; }
+.names .n1, .names .n2 { padding: .06em 0; }
 .names .amp {
   font-family: "Playfair Display", Georgia, serif;
   font-style: italic;
-  font-size: .42em;
-  line-height: 1;
+  font-size: .38em;
+  line-height: 1.05;
   color: var(--sage-deep);
 }
+.daughter { font-size: 2.9cqw; white-space: nowrap; }
 
-.lead { margin: 1.4cqw 0 0; color: var(--muted); font-size: 12px; font-size: max(11.5px, 3.3cqw); white-space: nowrap; }
-
-.occasion {
-  margin: 0;
-  font-family: "Lora", Georgia, serif;
-  font-weight: 600;
-  font-size: 29px;
-  font-size: 8cqw;
-  line-height: 1.25;
-  letter-spacing: .05em;
-  color: var(--sage-deep);
+/* the date, under a fine gold line */
+.frame .text .when {
+  position: relative;
+  margin-top: 1.3cqw;
+  padding-top: 1.3cqw;
+  font-weight: 700;
+  font-size: 2.85cqw;
+  line-height: 1.3;
+  white-space: nowrap;
 }
-
-/* a guest's own invitation greets them by name */
-.eyebrow.is-name {
-  font-family: "Playfair Display", Georgia, serif;
-  font-style: italic;
-  font-weight: 400;
-  font-size: 12px;
-  font-size: max(11.5px, 3.2cqw);
-  line-height: 1.25;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--rose-deep);
-  max-width: 33cqw;
-  margin-left: auto;
-  margin-right: auto;
-  text-wrap: balance;
+.when::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 26cqw;
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, var(--gold) 25%, var(--gold) 75%, transparent);
 }
-.frame.has-name .text { top: 19.8%; }
-.frame.has-name .names { font-size: 36px; font-size: 10cqw; }
-.frame.has-name .lead { line-height: 1.3; }
-
-.when { margin: .6cqw 0 0; font-weight: 700; line-height: 1.3; white-space: nowrap; font-size: 13px; font-size: max(12.5px, 3.35cqw); }
 
 main { max-width: 560px; margin: 0 auto; padding: 8px 18px 8px; }
 
@@ -312,6 +334,32 @@ details.cal .cal-links a {
 .counts button[aria-pressed="true"] { background: var(--sage-deep); color: #fff; border-color: var(--sage-deep); }
 .limit-note { margin: 8px 0 0; color: var(--muted); font-size: 17px; }
 
+/* ---------- who is coming: one row per person ---------- */
+.people { list-style: none; margin: 10px 0 0; padding: 0; text-align: left; }
+.person { padding: 14px 0 16px; border-top: 1px solid var(--line); }
+.person .who { margin: 0 0 10px; font-weight: 700; font-size: 20px; line-height: 1.25; }
+.person .who input { font-weight: 700; }
+.pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pick button {
+  min-height: 56px;
+  padding: 8px 6px;
+  font: inherit;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--ink);
+  background: #fff;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  cursor: pointer;
+}
+.pick button.yes[aria-pressed="true"] { background: var(--sage-deep); color: #fff; border-color: var(--sage-deep); }
+.pick button.no[aria-pressed="true"] { background: var(--rose-deep); color: #fff; border-color: var(--rose-deep); }
+.btn.all { margin: 4px 0 12px; min-height: 52px; font-size: 18px; }
+#view-done .summary .who-list { color: var(--muted); font-size: 17px; }
+.also { text-align: center; }
+.also h2 { padding: 0 34px; } /* keeps the words clear of the roses in the corner */
+.also .help { margin-bottom: 4px; }
+
 .heart { text-align: center; font-size: 34px; color: var(--rose); line-height: 1; margin-bottom: 8px; }
 #view-done h2 { text-align: center; }
 #view-done .summary { text-align: center; margin: 10px 0 4px; }
@@ -450,13 +498,17 @@ footer { text-align: center; padding: 26px 20px 60px; }
 .frame .text { z-index: 2; }
 .frame.is-through { --d0: 1s; }
 .frame.is-opening .text > *, .frame.is-opening .cue { opacity: 0; }
-.frame.is-card .eyebrow { animation: fadeUp .9s ease-out calc(var(--d0, 0s) + .9s) both; }
-.frame.is-card .names .n1 { animation: wipe 1.2s cubic-bezier(.4, 0, .2, 1) calc(var(--d0, 0s) + 1.5s) both; }
-.frame.is-card .names .amp { animation: fadeIn .7s ease-out calc(var(--d0, 0s) + 2.4s) both; }
-.frame.is-card .names .n2 { animation: wipe 1.2s cubic-bezier(.4, 0, .2, 1) calc(var(--d0, 0s) + 2.7s) both; }
-.frame.is-card .lead { animation: fadeUp .8s ease-out calc(var(--d0, 0s) + 3.9s) both; }
-.frame.is-card .occasion { animation: textPop 1s cubic-bezier(.2, .9, .3, 1.2) calc(var(--d0, 0s) + 4.3s) both; }
-.frame.is-card .when { animation: fadeUp .8s ease-out calc(var(--d0, 0s) + 4.9s) both; }
+.frame.is-card .bism { animation: fadeUp .9s ease-out calc(var(--d0, 0s) + .8s) both; }
+.frame.is-card .bism-en { animation: fadeUp .8s ease-out calc(var(--d0, 0s) + 1.2s) both; }
+.frame.is-card .hosts { animation: fadeUp .8s ease-out calc(var(--d0, 0s) + 1.8s) both; }
+.frame.is-card .request { animation: fadeUp .8s ease-out calc(var(--d0, 0s) + 2.2s) both; }
+.frame.is-card .request.at { animation-delay: calc(var(--d0, 0s) + 2.6s); }
+.frame.is-card .request.son { animation-delay: calc(var(--d0, 0s) + 3s); }
+.frame.is-card .names .n1 { animation: wipe 1.2s cubic-bezier(.4, 0, .2, 1) calc(var(--d0, 0s) + 3.4s) both; }
+.frame.is-card .names .amp { animation: fadeIn .7s ease-out calc(var(--d0, 0s) + 4.3s) both; }
+.frame.is-card .names .n2 { animation: wipe 1.2s cubic-bezier(.4, 0, .2, 1) calc(var(--d0, 0s) + 4.6s) both; }
+.frame.is-card .daughter { animation: fadeUp .8s ease-out calc(var(--d0, 0s) + 5.6s) both; }
+.frame.is-card .when { animation: fadeUp .8s ease-out calc(var(--d0, 0s) + 6.1s) both; }
 
 /* a small pointer to the reply form further down */
 .cue {
@@ -470,7 +522,7 @@ footer { text-align: center; padding: 26px 20px 60px; }
   opacity: 0;
 }
 .cue::after { content: "\2193"; display: inline-block; margin-left: .45em; animation: nudge 1.6s ease-in-out infinite; }
-.frame.is-card .cue { animation: fadeIn .9s ease-out calc(var(--d0, 0s) + 6.3s) both; }
+.frame.is-card .cue { animation: fadeIn .9s ease-out calc(var(--d0, 0s) + 7.2s) both; }
 
 /* a small button to watch the opening again */
 .replay {

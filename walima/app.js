@@ -2,20 +2,23 @@
   "use strict";
 
   var CFG = window.SITE;
+  var EVENT = CFG.eventKey || CFG.events[0].id; // which event this page is for: "walima" or "nikkah"
   var $ = function (id) { return document.getElementById(id); };
   var VIEWS = ["loading", "lost", "form", "done", "closed"];
+  var OTHER = { walima: { name: "Walima", path: "/walima/" }, nikkah: { name: "Nikkah", path: "/nikkah/" } };
 
-  var code = "";        // the personal code from the guest's link
-  var household = null; // { display, max, events: [eventId] }
-  var saved = null;     // the guest's saved reply, if any: { answers, message }
+  var code = "";        // the household's code from their link, for example rizwan-chacha
+  var household = null; // { display, code, people: [{ id, name, ask, coming }], also }
+  var replied = false;  // true once this household has answered
+  var message = "";     // the note they left for us
   var open = true;      // false once the RSVP deadline has passed
-  var answers = {};     // draft answers while filling in the form
+  var draft = [];       // answers while filling in the form: [{ id, coming, name }]
 
   // ---------- talking to the Google script (or sample data while previewing) ----------
 
   function api(action, payload) {
     if (!CFG.apiUrl) return demoApi(action, payload);
-    var body = JSON.stringify(Object.assign({ action: action }, payload));
+    var body = JSON.stringify(Object.assign({ action: action, event: EVENT }, payload));
     // No Content-Type header on purpose: it keeps this a "simple" request that Google accepts from any page.
     return fetch(CFG.apiUrl, { method: "POST", body: body }).then(function (r) {
       if (!r.ok) throw new Error("bad status");
@@ -23,29 +26,41 @@
     });
   }
 
-  // Sample guests, only used while apiUrl is empty (preview).
+  // Sample guests, only used while apiUrl is empty (preview). An empty name is a guest whose name we do not have yet.
   var DEMO = {
-    RAHMAN: { display: "The Rahman Family", max: 5, events: ["walima"] },
-    SIDDIQ: { display: "The Siddiqui Family", max: 2, events: ["walima"] },
-    AYESHA: { display: "Ayesha Malik", max: 1, events: ["walima"] },
-    CHAUDH: { display: "The Chaudhry Family", max: 12, events: ["walima"] }
+    rahman: { display: "Rahman & Family", people: ["Yusuf Rahman", "Maryam Rahman", "Bilal Rahman", "", ""] },
+    siddiqui: { display: "Siddiqui & Family", people: ["Imran Siddiqui", "Sana Siddiqui"] },
+    ayesha: { display: "Ayesha Malik", people: ["Ayesha Malik"] },
+    chaudhry: { display: "Chaudhry & Family", people: ["Tariq Chaudhry", "Nadia Chaudhry", "Hamid Chaudhry", "Sara Chaudhry", "Omar Chaudhry", "Hina Chaudhry", "Zain Chaudhry", "Noor Chaudhry", "", "", "", ""] }
   };
   var DEADLINE = Date.parse("2026-12-14T05:00:00Z"); // end of Dec 13 in Toronto
+  var DEMO_STORE = "demoPeople-" + EVENT;
 
-  function demoStore() { try { return JSON.parse(localStorage.getItem("demoReplies") || "{}"); } catch (e) { return {}; } }
+  function codeKey(c) { return String(c).toLowerCase().replace(/[^a-z0-9]/g, ""); }
+  function demoStore() { try { return JSON.parse(localStorage.getItem(DEMO_STORE) || "{}"); } catch (e) { return {}; } }
 
   function demoApi(action, p) {
     return new Promise(function (resolve) {
       setTimeout(function () {
-        var store = demoStore(), h = DEMO[p.code];
-        if (!h) { resolve({ ok: false, error: "unknown" }); return; }
-        if (action === "get") {
-          resolve({ ok: true, household: h, response: store[p.code] || null, open: Date.now() < DEADLINE });
-        } else if (action === "submit") {
-          store[p.code] = { answers: p.answers, message: p.message || "" };
-          localStorage.setItem("demoReplies", JSON.stringify(store));
-          resolve({ ok: true, response: store[p.code] });
+        var store = demoStore(), key = codeKey(p.code), d = DEMO[key];
+        if (!d) { resolve({ ok: false, error: "unknown" }); return; }
+        if (action === "submit") {
+          store[key] = { people: p.people, message: p.message || "" };
+          localStorage.setItem(DEMO_STORE, JSON.stringify(store));
         }
+        var s = store[key], by = {};
+        (s ? s.people : []).forEach(function (a) { by[a.id] = a; });
+        resolve({
+          ok: true,
+          household: {
+            display: d.display, code: key, also: "",
+            people: d.people.map(function (n, i) {
+              var a = by[i + 1];
+              return { id: i + 1, name: n || (a && a.name) || "", ask: !n, coming: a ? a.coming : null };
+            })
+          },
+          replied: !!s, message: s ? s.message : "", open: Date.now() < DEADLINE
+        });
       }, 450);
     });
   }
@@ -95,27 +110,34 @@
   function eventCard(ev) {
     var card = el("div", "event");
     card.appendChild(el("h3", null, ev.name));
-    card.appendChild(el("p", "when-line", ev.dateText + " at " + ev.timeText));
+    card.appendChild(el("p", "when-line", ev.dateText + (ev.timeText ? " at " + ev.timeText : "")));
     var where = el("p", "where", ev.venue);
-    where.appendChild(el("small", null, ev.address));
+    if (ev.address) where.appendChild(el("small", null, ev.address));
     card.appendChild(where);
 
+    // the map and calendar buttons appear once those details are filled in (config.js)
     var actions = el("div", "actions");
-    var map = el("a", "btn secondary", "Open in Google Maps");
-    map.href = ev.mapsUrl; map.target = "_blank"; map.rel = "noopener";
-    actions.appendChild(map);
-
-    var d = el("details", "cal");
-    d.appendChild(el("summary", null, "Add to calendar"));
-    var links = el("div", "cal-links");
-    var g = el("a", null, "Google Calendar");
-    g.href = googleCalUrl(ev); g.target = "_blank"; g.rel = "noopener";
-    var ics = el("a", null, "Apple or Outlook");
-    ics.href = ev.icsFile;
-    links.appendChild(g); links.appendChild(ics);
-    d.appendChild(links);
-    actions.appendChild(d);
-    card.appendChild(actions);
+    if (ev.mapsUrl) {
+      var map = el("a", "btn secondary", "Open in Google Maps");
+      map.href = ev.mapsUrl; map.target = "_blank"; map.rel = "noopener";
+      actions.appendChild(map);
+    }
+    if (ev.startUTC) {
+      var d = el("details", "cal");
+      d.appendChild(el("summary", null, "Add to calendar"));
+      var links = el("div", "cal-links");
+      var g = el("a", null, "Google Calendar");
+      g.href = googleCalUrl(ev); g.target = "_blank"; g.rel = "noopener";
+      links.appendChild(g);
+      if (ev.icsFile) {
+        var ics = el("a", null, "Apple or Outlook");
+        ics.href = ev.icsFile;
+        links.appendChild(ics);
+      }
+      d.appendChild(links);
+      actions.appendChild(d);
+    }
+    if (actions.firstChild) card.appendChild(actions);
     return card;
   }
 
@@ -135,13 +157,13 @@
     });
   }
 
-  // Put the guest's name on the invitation: "Dear Rahman Family".
+  // Put the guest's name on the invitation: "Dear Rahman & Family".
   function greet(name) {
     var film = $("film");
     var eyebrow = film && film.querySelector(".eyebrow"), lead = film && film.querySelector(".lead");
     if (!eyebrow || !lead || !name) return;
-    var who = "Dear " + String(name).replace(/^the\s+/i, "");
-    eyebrow.textContent = who;
+    var invite = lead.textContent; // "invite you to celebrate our"
+    eyebrow.textContent = "Dear " + String(name).replace(/^the\s+/i, "");
     eyebrow.classList.add("is-name");
     film.classList.add("has-name");
     // add "together with our families" as an extra line, unless the name is long
@@ -149,26 +171,43 @@
     lead.textContent = "";
     lead.appendChild(document.createTextNode("together with our families"));
     lead.appendChild(document.createElement("br"));
-    lead.appendChild(document.createTextNode("invite you to celebrate our"));
+    lead.appendChild(document.createTextNode(invite));
     function fit() {
       var line = parseFloat(getComputedStyle(eyebrow).lineHeight) || 16;
-      if (eyebrow.offsetHeight > line * 1.6) lead.textContent = "invite you to celebrate our";
+      if (eyebrow.offsetHeight > line * 1.6) lead.textContent = invite;
     }
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit); else fit();
   }
 
+  // A family invited to both events gets a button to the other invitation.
+  function showAlso() {
+    var o = OTHER[household.also], box = $("also-card");
+    if (!o || !box) return;
+    box.querySelector("h2").textContent = "You are also invited to our " + o.name;
+    var a = box.querySelector("a");
+    a.href = o.path + "?i=" + encodeURIComponent(household.code || code);
+    a.textContent = "Open the " + o.name + " invitation";
+    box.hidden = false;
+  }
+
+  function take(r) {
+    household = r.household;
+    replied = !!r.replied;
+    message = r.message || "";
+    open = r.open;
+  }
+
   function start() {
     code = (new URLSearchParams(window.location.search).get("i") || "").trim();
-    if (!/^[A-Za-z0-9]{4,24}$/.test(code)) { show("lost"); return; }
+    if (!/^[A-Za-z0-9][A-Za-z0-9 _-]{1,39}$/.test(code)) { show("lost"); return; }
     api("get", { code: code }).then(function (r) {
       if (!r.ok) { show("lost"); return; }
-      household = r.household;
+      take(r);
       greet(household.display);
-      saved = r.response;
-      open = r.open;
-      if (saved) { renderDone(); show("done"); }
+      showAlso();
+      if (replied) { renderDone(); show("done"); }
       else if (!open) { show("closed"); }
-      else { answers = {}; renderForm(); show("form"); }
+      else { renderForm(); show("form"); }
     }).catch(function () {
       $("view-lost").querySelector("h2").textContent = "We could not reach the server";
       $("view-lost").querySelector("p").textContent = "Please check your internet connection and reload this page.";
@@ -176,82 +215,105 @@
     });
   }
 
-  // ---------- the reply form ----------
+  // ---------- the reply form: one row per person, tap Coming or Can't come ----------
 
   function renderForm() {
-    var prior = saved ? saved.answers : {};
+    var ev = eventById(EVENT), many = household.people.length > 1;
     $("form-title").textContent = "Welcome, " + household.display;
-    $("message").value = saved ? (saved.message || "") : "";
+    $("form-help").textContent = many ? "Please tap Coming or Can't come for each person." : "Please let us know if you can join us.";
+    $("message").value = message;
     showError("form-error");
     var wrap = $("events");
     wrap.textContent = "";
 
-    household.events.forEach(function (evId) {
-      var ev = eventById(evId);
-      if (!ev) return;
-      answers[evId] = prior[evId] ? { attending: prior[evId].attending, count: prior[evId].count } : { attending: null, count: null };
-      var card = eventCard(ev);
+    var card = eventCard(ev);
+    card.appendChild(el("p", "q", many ? "Who will be joining us?" : "Will you be joining us?"));
 
-      card.appendChild(el("p", "q", "Will you be joining us?"));
-      var choice = el("div", "choice");
-      var yes = el("button", "btn yes", "Yes, we will be there");
-      var no = el("button", "btn no", "Sorry, we cannot make it");
-      yes.type = no.type = "button";
-      choice.appendChild(yes); choice.appendChild(no);
-      card.appendChild(choice);
+    draft = household.people.map(function (p) { return { id: p.id, coming: p.coming, name: p.ask ? (p.name || "") : "" }; });
+    var refreshers = [];
+    var list = el("ul", "people");
 
-      var countWrap = el("div", "count-wrap");
-      card.appendChild(countWrap);
-
-      function refresh() {
-        var a = answers[evId];
-        yes.setAttribute("aria-pressed", a.attending === true ? "true" : "false");
-        no.setAttribute("aria-pressed", a.attending === false ? "true" : "false");
-        countWrap.textContent = "";
-        if (a.attending === true) {
-          countWrap.appendChild(el("p", "q", "How many people will be coming, including you?"));
-          var grid = el("div", "counts");
-          for (var n = 1; n <= household.max; n++) {
-            (function (n) {
-              var b = el("button", null, String(n));
-              b.type = "button";
-              b.setAttribute("aria-pressed", a.count === n ? "true" : "false");
-              b.setAttribute("aria-label", n + (n === 1 ? " person" : " people"));
-              b.addEventListener("click", function () { a.count = n; refresh(); });
-              grid.appendChild(b);
-            })(n);
-          }
-          countWrap.appendChild(grid);
-          countWrap.appendChild(el("p", "limit-note", household.max === 1 ? "Your invitation is for 1 guest." : "Your invitation is for up to " + household.max + " guests."));
-        }
+    household.people.forEach(function (p, i) {
+      var d = draft[i];
+      var li = el("li", "person");
+      var label = p.name || "Guest " + (i + 1);
+      if (p.ask) {
+        var who = el("div", "who");
+        var input = document.createElement("input");
+        input.type = "text";
+        input.maxLength = 40;
+        input.value = d.name;
+        input.placeholder = "Guest's name";
+        input.autocomplete = "off";
+        input.setAttribute("autocapitalize", "words");
+        input.setAttribute("aria-label", "Name of guest " + (i + 1));
+        input.addEventListener("input", function () { d.name = input.value; });
+        who.appendChild(input);
+        li.appendChild(who);
+      } else {
+        li.appendChild(el("p", "who", p.name));
       }
-      yes.addEventListener("click", function () { answers[evId].attending = true; refresh(); });
-      no.addEventListener("click", function () { answers[evId].attending = false; answers[evId].count = 0; refresh(); });
+
+      var pick = el("div", "pick");
+      var yes = el("button", "yes", "Coming");
+      var no = el("button", "no", "Can't come");
+      yes.type = no.type = "button";
+      yes.setAttribute("aria-label", label + ": coming");
+      no.setAttribute("aria-label", label + ": can't come");
+      function refresh() {
+        yes.setAttribute("aria-pressed", d.coming === true ? "true" : "false");
+        no.setAttribute("aria-pressed", d.coming === false ? "true" : "false");
+      }
+      yes.addEventListener("click", function () { d.coming = true; refresh(); });
+      no.addEventListener("click", function () { d.coming = false; refresh(); });
+      refreshers.push(refresh);
       refresh();
-      wrap.appendChild(card);
+      pick.appendChild(yes); pick.appendChild(no);
+      li.appendChild(pick);
+      list.appendChild(li);
     });
+
+    if (many) {
+      var all = el("button", "btn secondary all", "Everyone is coming");
+      all.type = "button";
+      all.addEventListener("click", function () {
+        draft.forEach(function (d) { d.coming = true; });
+        refreshers.forEach(function (f) { f(); });
+      });
+      card.appendChild(all);
+    }
+    card.appendChild(list);
+    wrap.appendChild(card);
   }
 
   $("rsvp-form").addEventListener("submit", function (e) {
     e.preventDefault();
     showError("form-error");
-    var ids = Object.keys(answers), i, a;
-    for (i = 0; i < ids.length; i++) {
-      a = answers[ids[i]];
-      var name = eventById(ids[i]).name;
-      if (a.attending === null) { showError("form-error", "Please tell us if you can come to the " + name + "."); return; }
-      if (a.attending && !a.count) { showError("form-error", "Please choose how many people are coming to the " + name + "."); return; }
+    var i, d, p;
+    for (i = 0; i < draft.length; i++) {
+      d = draft[i]; p = household.people[i];
+      if (d.coming === null) {
+        showError("form-error", draft.length > 1
+          ? "Please tap Coming or Can't come for " + (p.name || "each guest") + "."
+          : "Please tell us if you can come.");
+        return;
+      }
+      if (p.ask && d.coming && !d.name.trim()) {
+        showError("form-error", "Please type the name of each guest who is coming.");
+        return;
+      }
     }
     var btn = $("send-btn");
     busy(btn, true, "Sending...");
-    api("submit", { code: code, answers: answers, message: $("message").value.trim() }).then(function (r) {
+    var people = draft.map(function (d) { return { id: d.id, coming: d.coming, name: d.name.trim() }; });
+    api("submit", { code: code, people: people, message: $("message").value.trim() }).then(function (r) {
       if (!r.ok) {
         showError("form-error", r.error === "closed"
           ? "Sorry, replies have closed. Please contact Irfan or Aafia directly."
           : "Something went wrong. Please try again.");
         return;
       }
-      saved = r.response;
+      take(r);
       renderDone();
       show("done");
     }).catch(function () {
@@ -262,26 +324,32 @@
   // ---------- thank you ----------
 
   function renderDone() {
+    var ev = eventById(EVENT);
     $("done-title").textContent = "Thank you, " + household.display;
     var sum = $("done-summary"), extra = $("done-extra");
     sum.textContent = ""; extra.textContent = "";
     sum.className = "summary";
 
-    household.events.forEach(function (evId) {
-      var ev = eventById(evId), a = saved.answers[evId];
-      if (!ev || !a) return;
-      var p = el("p");
-      if (a.attending) {
-        p.appendChild(document.createTextNode("We will see you at the " + ev.name + ": "));
-        p.appendChild(el("strong", null, a.count + (a.count === 1 ? " guest" : " guests")));
-        p.appendChild(document.createTextNode("."));
-        extra.appendChild(eventCard(ev));
-      } else {
-        p.textContent = "We are sorry you cannot make the " + ev.name + ". You will be missed.";
+    function names(list) { return list.map(function (p) { return p.name || "Guest"; }).join(", "); }
+    var coming = household.people.filter(function (p) { return p.coming === true; });
+    var away = household.people.filter(function (p) { return p.coming === false; });
+
+    var line = el("p");
+    if (coming.length) {
+      line.appendChild(document.createTextNode("We will see you at the " + ev.name + ": "));
+      line.appendChild(el("strong", null, coming.length + (coming.length === 1 ? " guest" : " guests")));
+      line.appendChild(document.createTextNode("."));
+      sum.appendChild(line);
+      if (household.people.length > 1) {
+        sum.appendChild(el("p", "who-list", "Coming: " + names(coming)));
+        if (away.length) sum.appendChild(el("p", "who-list", "Not able to come: " + names(away)));
       }
-      sum.appendChild(p);
-    });
-    if (saved.message) sum.appendChild(el("p", null, "Your message has been passed on to us."));
+      extra.appendChild(eventCard(ev));
+    } else {
+      line.textContent = "We are sorry you cannot make the " + ev.name + ". You will be missed.";
+      sum.appendChild(line);
+    }
+    if (message) sum.appendChild(el("p", null, "Your message has been passed on to us."));
 
     $("change-btn").hidden = !open;
     $("done-note").textContent = open
@@ -290,7 +358,6 @@
   }
 
   $("change-btn").addEventListener("click", function () {
-    answers = {};
     renderForm();
     show("form");
   });

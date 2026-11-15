@@ -4,6 +4,9 @@ window.SITE = {
   // The address of the Google script that stores RSVPs. Leave empty to preview with sample guests.
   apiUrl: "https://script.google.com/macros/s/AKfycbyXSqae16rSS_ZKvuMKq4abf167Y7DLk82A0rK61g81n2JDaiRGOLXYy25HRLfk_I58TA/exec",
 
+  // Tells the script these replies are for the Walima.
+  eventKey: "walima",
+
   deadlineText: "Sunday, December 13, 2026",
 
   events: [
@@ -11,14 +14,14 @@ window.SITE = {
       id: "walima",
       name: "Walima",
       dateText: "Monday, January 11, 2027",
-      timeText: "6:00 pm",
+      timeText: "7:00 pm",
       venue: "Toronto Grand Convention Centre",
       address: "30 Baywood Rd, Etobicoke, ON M9V 2Z8",
       mapsUrl: "https://www.google.com/maps/search/?api=1&query=Toronto%20Grand%20Convention%20Centre%2C%2030%20Baywood%20Rd%2C%20Etobicoke%2C%20ON%20M9V%202Z8",
-      // Calendar times in UTC (6:00 pm Toronto time in January is 23:00 UTC). End time is a 5 hour placeholder.
+      // Calendar times in UTC (7:00 pm Toronto time in January is 00:00 UTC the next day). End time is a 5 hour placeholder.
       calendarTitle: "Irfan & Aafia's Walima",
-      startUTC: "20270111T230000Z",
-      endUTC: "20270112T040000Z",
+      startUTC: "20270112T000000Z",
+      endUTC: "20270112T050000Z",
       icsFile: "walima.ics"
     }
   ]
