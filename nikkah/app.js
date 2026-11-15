@@ -5,7 +5,7 @@
   var EVENT = CFG.eventKey || CFG.events[0].id; // which event this page is for: "walima" or "nikkah"
   var $ = function (id) { return document.getElementById(id); };
   var VIEWS = ["loading", "lost", "form", "done", "closed"];
-  var OTHER = { walima: { name: "Walima", path: "/walima/" }, nikkah: { name: "Nikkah", path: "/nikkah/" } };
+  var OTHER = { walima: { name: "Walima", path: "/walima/" }, nikkah: { name: "Shadi", path: "/nikkah/" } };
 
   var code = "";        // the household's code from their link, for example rizwan-chacha
   var household = null; // { display, code, people: [{ id, name, ask, coming }], also }
