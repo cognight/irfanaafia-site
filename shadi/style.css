@@ -30,11 +30,14 @@ body {
 .frame {
   position: relative;
   width: 100%;
+  /* Phones differ in how much room the browser's own bars leave. The picture shrinks a little,
+     when it has to, so the whole invitation and the "Reply below" button fit on the first screen. */
+  width: min(100%, max(78%, calc(100svh * 9 / 16)));
   max-width: 520px;
   margin: 0 auto;
   aspect-ratio: 9 / 16;
   container-type: inline-size;
-  border-radius: 0;
+  border-radius: 0 0 20px 20px;
   overflow: hidden;
   background: #2A0C12;
   box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
