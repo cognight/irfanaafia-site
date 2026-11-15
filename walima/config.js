@@ -20,6 +20,9 @@ window.SITE = {
       name: "Walima",
       dateText: "Monday, January 11, 2027",
       shortDate: "Mon, Jan 11",
+      heading: "Walima Ceremony",
+      // the date as it is set out on the reply card (time: "" until it is known)
+      dateParts: { weekday: "Mon", day: "11", month: "January", year: "2027", time: "at 7 pm" },
       timeText: "7:00 pm",
       venue: "Toronto Grand Convention Centre",
       address: "30 Baywood Rd, Etobicoke, ON M9V 2Z8",

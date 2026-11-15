@@ -108,10 +108,29 @@
       "&location=" + encodeURIComponent(ev.venue + ", " + ev.address);
   }
 
+  // The date, set out the way a printed card does it: month on top, the day large in the
+  // middle with the weekday and time either side, the year underneath.
+  function dateBox(ev) {
+    var p = ev.dateParts, full = ev.dateText + (ev.timeText ? " at " + ev.timeText : "");
+    if (!p) return el("p", "when-line", full);
+    var box = el("div", "datebox");
+    box.setAttribute("role", "img");
+    box.setAttribute("aria-label", full);
+    box.appendChild(el("p", "db-month", p.month));
+    var row = el("div", "db-row");
+    row.appendChild(el("span", "db-side", p.weekday));
+    row.appendChild(el("span", "db-day", p.day));
+    row.appendChild(el("span", "db-side", p.time || p.year));
+    box.appendChild(row);
+    if (p.time) box.appendChild(el("p", "db-year", p.year));
+    return box;
+  }
+
   function eventCard(ev) {
     var card = el("div", "event");
-    card.appendChild(el("h3", null, ev.name));
-    card.appendChild(el("p", "when-line", ev.dateText + (ev.timeText ? " at " + ev.timeText : "")));
+    card.appendChild(el("h3", null, ev.heading || ev.name));
+    card.appendChild(dateBox(ev));
+    card.appendChild(el("p", "at", "at"));
     var where = el("p", "where", ev.venue);
     if (ev.address) where.appendChild(el("small", null, ev.address));
     card.appendChild(where);
@@ -119,7 +138,7 @@
     // the map and calendar buttons appear once those details are filled in (config.js)
     var actions = el("div", "actions");
     if (ev.mapsUrl) {
-      var map = el("a", "btn secondary", "Open in Google Maps");
+      var map = el("a", "btn secondary", "Open map");
       map.href = ev.mapsUrl; map.target = "_blank"; map.rel = "noopener";
       actions.appendChild(map);
     }
@@ -276,97 +295,115 @@
     });
   }
 
-  // ---------- the reply form: one row per person, tap Coming or Can't come ----------
+  // ---------- the reply: one tap for the whole family ----------
+
+  var choice = null;  // true = attending, false = not attending, null = not chosen yet
+  var custom = false; // true while the family is choosing person by person
 
   function renderForm() {
-    var ev = eventById(EVENT), many = household.people.length > 1;
-    $("form-title").textContent = "Welcome, " + household.display;
-    $("form-help").textContent = many ? "Please tap Coming or Can't come for each person." : "Please let us know if you can join us.";
+    var ev = eventById(EVENT), people = household.people, many = people.length > 1;
+    $("form-title").textContent = household.display;
     $("message").value = message;
     showError("form-error");
     var wrap = $("events");
     wrap.textContent = "";
+    wrap.appendChild(eventCard(ev));
 
-    var card = eventCard(ev);
-    card.appendChild(el("p", "q", many ? "Who will be joining us?" : "Will you be joining us?"));
-
-    draft = household.people.map(function (p) { return { id: p.id, coming: p.coming, name: p.ask ? (p.name || "") : "" }; });
-    var refreshers = [];
-    var list = el("ul", "people");
-
-    household.people.forEach(function (p, i) {
-      var d = draft[i];
-      var li = el("li", "person");
-      var label = p.name || "Guest " + (i + 1);
-      if (p.ask) {
-        var who = el("div", "who");
-        var input = document.createElement("input");
-        input.type = "text";
-        input.maxLength = 40;
-        input.value = d.name;
-        input.placeholder = "Guest's name";
-        input.autocomplete = "off";
-        input.setAttribute("autocapitalize", "words");
-        input.setAttribute("aria-label", "Name of guest " + (i + 1));
-        input.addEventListener("input", function () { d.name = input.value; });
-        who.appendChild(input);
-        li.appendChild(who);
-      } else {
-        li.appendChild(el("p", "who", p.name));
-      }
-
-      var pick = el("div", "pick");
-      var yes = el("button", "yes", "Coming");
-      var no = el("button", "no", "Can't come");
-      yes.type = no.type = "button";
-      yes.setAttribute("aria-label", label + ": coming");
-      no.setAttribute("aria-label", label + ": can't come");
-      function refresh() {
-        yes.setAttribute("aria-pressed", d.coming === true ? "true" : "false");
-        no.setAttribute("aria-pressed", d.coming === false ? "true" : "false");
-      }
-      yes.addEventListener("click", function () { d.coming = true; refresh(); });
-      no.addEventListener("click", function () { d.coming = false; refresh(); });
-      refreshers.push(refresh);
-      refresh();
-      pick.appendChild(yes); pick.appendChild(no);
-      li.appendChild(pick);
-      list.appendChild(li);
+    var yesCount = people.filter(function (p) { return p.coming === true; }).length;
+    var noCount = people.filter(function (p) { return p.coming === false; }).length;
+    custom = many && yesCount > 0 && noCount > 0; // they chose person by person last time
+    choice = yesCount ? true : (noCount ? false : null);
+    draft = people.map(function (p) {
+      return { id: p.id, coming: custom ? p.coming !== false : true, name: p.ask ? (p.name || "") : "" };
     });
 
+    wrap.appendChild(el("p", "q", "Will you be joining us?"));
+    var answer = el("div", "answer");
+    var yes = el("button", "yes", "Attending");
+    var no = el("button", "no", "Not attending");
+    yes.type = no.type = "button";
+    answer.appendChild(yes); answer.appendChild(no);
+    wrap.appendChild(answer);
+
+    // a family can also answer person by person, but only if they ask to
+    var some = null, list = null, rows = [];
     if (many) {
-      var all = el("button", "btn secondary all", "Everyone is coming");
-      all.type = "button";
-      all.addEventListener("click", function () {
-        draft.forEach(function (d) { d.coming = true; });
-        refreshers.forEach(function (f) { f(); });
+      some = el("button", "some");
+      some.type = "button";
+      wrap.appendChild(some);
+      list = el("ul", "people");
+      people.forEach(function (p, i) {
+        var d = draft[i];
+        var li = el("li", "person");
+        var label = p.name || "Guest " + (i + 1);
+        if (p.ask) {
+          var who = el("div", "who");
+          var input = document.createElement("input");
+          input.type = "text";
+          input.maxLength = 40;
+          input.value = d.name;
+          input.placeholder = "Guest's name";
+          input.autocomplete = "off";
+          input.setAttribute("autocapitalize", "words");
+          input.setAttribute("aria-label", "Name of guest " + (i + 1));
+          input.addEventListener("input", function () { d.name = input.value; });
+          who.appendChild(input);
+          li.appendChild(who);
+        } else {
+          li.appendChild(el("p", "who", p.name));
+        }
+        var pick = el("div", "pick");
+        var a = el("button", "yes", "Coming");
+        var b = el("button", "no", "Can't come");
+        a.type = b.type = "button";
+        a.setAttribute("aria-label", label + ": coming");
+        b.setAttribute("aria-label", label + ": can't come");
+        function paint() {
+          a.setAttribute("aria-pressed", d.coming === true ? "true" : "false");
+          b.setAttribute("aria-pressed", d.coming === false ? "true" : "false");
+        }
+        a.addEventListener("click", function () { d.coming = true; paint(); });
+        b.addEventListener("click", function () { d.coming = false; paint(); });
+        rows.push(paint);
+        paint();
+        pick.appendChild(a); pick.appendChild(b);
+        li.appendChild(pick);
+        list.appendChild(li);
       });
-      card.appendChild(all);
+      wrap.appendChild(list);
     }
-    card.appendChild(list);
-    wrap.appendChild(card);
+
+    function refresh() {
+      yes.setAttribute("aria-pressed", choice === true ? "true" : "false");
+      no.setAttribute("aria-pressed", choice === false ? "true" : "false");
+      if (!many) return;
+      some.hidden = choice === false;
+      some.textContent = custom ? "All of us are coming" : "Only some of you? Choose who is coming";
+      list.hidden = !(custom && choice !== false);
+    }
+    yes.addEventListener("click", function () { choice = true; refresh(); });
+    no.addEventListener("click", function () { choice = false; custom = false; refresh(); });
+    if (some) {
+      some.addEventListener("click", function () {
+        custom = !custom;
+        choice = true;
+        if (!custom) draft.forEach(function (d) { d.coming = true; });
+        rows.forEach(function (f) { f(); });
+        refresh();
+      });
+    }
+    refresh();
   }
 
   $("rsvp-form").addEventListener("submit", function (e) {
     e.preventDefault();
     showError("form-error");
-    var i, d, p;
-    for (i = 0; i < draft.length; i++) {
-      d = draft[i]; p = household.people[i];
-      if (d.coming === null) {
-        showError("form-error", draft.length > 1
-          ? "Please tap Coming or Can't come for " + (p.name || "each guest") + "."
-          : "Please tell us if you can come.");
-        return;
-      }
-      if (p.ask && d.coming && !d.name.trim()) {
-        showError("form-error", "Please type the name of each guest who is coming.");
-        return;
-      }
-    }
+    if (choice === null) { showError("form-error", "Please tap Attending or Not attending."); return; }
+    var people = draft.map(function (d) {
+      return { id: d.id, coming: choice === false ? false : (custom ? d.coming : true), name: custom ? d.name.trim() : "" };
+    });
     var btn = $("send-btn");
     busy(btn, true, "Sending...");
-    var people = draft.map(function (d) { return { id: d.id, coming: d.coming, name: d.name.trim() }; });
     api("submit", { code: code, people: people, message: $("message").value.trim() }).then(function (r) {
       if (!r.ok) {
         showError("form-error", r.error === "closed"
@@ -386,7 +423,7 @@
 
   function renderDone() {
     var ev = eventById(EVENT);
-    $("done-title").textContent = "Thank you, " + household.display;
+    $("done-title").textContent = household.display;
     var sum = $("done-summary"), extra = $("done-extra");
     sum.textContent = ""; extra.textContent = "";
     sum.className = "summary";
@@ -401,9 +438,9 @@
       line.appendChild(el("strong", null, coming.length + (coming.length === 1 ? " guest" : " guests")));
       line.appendChild(document.createTextNode("."));
       sum.appendChild(line);
-      if (household.people.length > 1) {
+      if (away.length) {
         sum.appendChild(el("p", "who-list", "Coming: " + names(coming)));
-        if (away.length) sum.appendChild(el("p", "who-list", "Not able to come: " + names(away)));
+        sum.appendChild(el("p", "who-list", "Not able to come: " + names(away)));
       }
       extra.appendChild(eventCard(ev));
     } else {

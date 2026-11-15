@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=Nunito+Sans:wght@400;600;700&family=Pinyon+Script&family=Aref+Ruqaa&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=16">
+  <link rel="stylesheet" href="style.css?v=17">
 </head>
 <body>
   <header class="hero">
@@ -106,22 +106,23 @@
       <p class="help">To reply, use the link that Irfan and Aafia sent you. It opens your own invitation and saves your answer. If it does not work, please contact them directly.</p>
     </section>
 
-    <section id="view-form" class="card" hidden>
-      <h2 id="form-title">Welcome</h2>
-      <p class="help" id="form-help">Please let us know if you can join us.</p>
+    <section id="view-form" class="card invite" hidden>
+      <p class="for">Invitation for</p>
+      <h2 id="form-title" class="guest">Welcome</h2>
       <form id="rsvp-form" novalidate>
         <div id="events"></div>
         <label for="message">A message for us (optional)</label>
-        <textarea id="message" rows="4" maxlength="500" placeholder="Write a few words, if you like"></textarea>
+        <textarea id="message" rows="3" maxlength="500" placeholder="Write a few words, if you like"></textarea>
         <p id="form-error" class="error" role="alert" hidden></p>
         <button type="submit" class="btn primary" id="send-btn">Send my reply</button>
       </form>
       <p class="deadline">You can change your answer until <strong id="deadline-2"></strong></p>
     </section>
 
-    <section id="view-done" class="card" hidden>
+    <section id="view-done" class="card invite" hidden>
       <div class="heart" aria-hidden="true">&#10084;</div>
-      <h2 id="done-title">Thank you</h2>
+      <p class="for">Thank you</p>
+      <h2 id="done-title" class="guest"></h2>
       <div id="done-summary"></div>
       <div id="done-extra"></div>
       <button type="button" class="btn secondary" id="change-btn">Change my answer</button>
@@ -138,7 +139,7 @@
     <p class="sign">With love, Irfan <span class="amp">&amp;</span> Aafia</p>
   </footer>
 
-  <script src="config.js?v=16"></script>
-  <script src="app.js?v=16"></script>
+  <script src="config.js?v=17"></script>
+  <script src="app.js?v=17"></script>
 </body>
 </html>

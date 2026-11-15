@@ -19,6 +19,9 @@ window.SITE = {
       name: "Shadi",
       dateText: "Tuesday, January 5, 2027",
       shortDate: "Tue, Jan 5",
+      heading: "Shadi Ceremony",
+      // the date as it is set out on the reply card (time: "" until it is known)
+      dateParts: { weekday: "Tue", day: "5", month: "January", year: "2027", time: "" },
       timeText: "",   // for example "2:00 pm"
       venue: "Venue to be announced",
       address: "",
