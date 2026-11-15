@@ -1,4 +1,4 @@
-// Shadi page (its address is /nikkah): event details and settings. This is the one place to change what the reply form shows.
+// Shadi page (irfanaafia.com/shadi): event details and settings. This is the one place to change what the reply form shows.
 // (The date line on the invitation picture itself is in index.html: look for class="when".)
 window.SITE = {
   // The address of the Google script that stores RSVPs. Leave empty to preview with sample guests.

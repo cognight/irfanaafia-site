@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Irfan &amp; Aafia · Shadi</title>
+  <meta name="description" content="You are invited to our Shadi on Tuesday, January 5, 2027.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#3E0D17">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Irfan &amp; Aafia · Shadi">
+  <meta property="og:description" content="You are invited to our Shadi on Tuesday, January 5, 2027.">
+  <meta property="og:url" content="https://irfanaafia.com/shadi/">
+  <meta property="og:image" content="https://irfanaafia.com/shadi/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Aref+Ruqaa&family=Lora:wght@500;600&family=Nunito+Sans:wght@400;600;700&family=Pinyon+Script&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=9">
+</head>
+<body>
+  <header class="hero">
+    <div class="frame" id="film" data-opening-seconds="9.7" data-handoff="0.8" data-seen-key="nikkahFilmSeen">
+      <!-- the invitation: the couple at the arch, gently moving, with the words in the arch -->
+      <video class="art scene-card" muted loop playsinline preload="auto" poster="invite.jpg?v=4" aria-hidden="true" tabindex="-1" disablepictureinpicture>
+        <source src="loop.mp4?v=4" type="video/mp4">
+      </video>
+
+      <!-- warm candlelight over the lanterns -->
+      <div class="glows" aria-hidden="true">
+        <i style="--x:4%;--y:42%;--t:2.9s;--dl:-.4s"></i>
+        <i style="--x:96%;--y:42%;--t:3.4s;--dl:-1.7s"></i>
+        <i style="--x:6.5%;--y:79%;--t:2.6s;--dl:-1.1s"></i>
+        <i style="--x:12.5%;--y:80.5%;--t:3.1s;--dl:-2.2s"></i>
+        <i style="--x:88.5%;--y:80.5%;--t:2.8s;--dl:-.9s"></i>
+        <i style="--x:94%;--y:79%;--t:3.3s;--dl:-2.6s"></i>
+      </div>
+
+      <div class="text">
+        <p class="bism" lang="ar" dir="rtl">بسم الله الرحمن الرحيم</p>
+        <p class="bism-en">In the name of Allah,<br>the Gracious, the Merciful</p>
+        <p class="hosts">Mr. &amp; Mrs. Maqsood</p>
+        <p class="request">request the honour of your presence</p>
+        <p class="request at">at the <b class="occasion">Shadi Ceremony</b></p>
+        <p class="request son">of their beloved daughter</p>
+        <h1 class="names"><span class="n1">Aafia Maqsood</span> <span class="amp">with</span> <span class="n2">Irfan Imran</span></h1>
+        <p class="daughter">Son of Mr. &amp; Mrs. Imran</p>
+        <p class="when">Tuesday, January 5, 2027</p>
+      </div>
+
+      <p class="cue" aria-hidden="true">Reply below</p>
+      <button type="button" class="replay" aria-label="Play the opening again">Play again</button>
+
+      <!-- the opening: the doors open and we walk in to the couple, in one shot -->
+      <div class="opening" aria-hidden="true">
+        <video class="art scene-open" muted playsinline preload="auto" poster="doors.jpg?v=4" tabindex="-1" disablepictureinpicture>
+          <source src="open.mp4?v=4" type="video/mp4">
+        </video>
+        <p class="monogram"><span class="mono-i">I</span><span class="mono-amp">&amp;</span><span class="mono-a">A</span></p>
+      </div>
+    </div>
+    <script>
+      // Start with the opening. Skip it for people who have already seen it,
+      // and show the still invitation when this phone asks for less motion.
+      (function () {
+        var film = document.getElementById("film"), seen = false;
+        var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        try { seen = localStorage.getItem("nikkahFilmSeen") === "1"; } catch (e) {}
+        film.className += calm ? " is-card is-still" : seen ? " is-card is-seen" : " is-opening";
+      })();
+    </script>
+  </header>
+
+  <main>
+    <p id="demo-note" class="demo-note" hidden></p>
+
+    <section id="view-loading" class="card">
+      <h2>Opening your invitation</h2>
+      <p class="help">One moment, please.</p>
+    </section>
+
+    <section id="view-lost" class="card" hidden>
+      <h2>Please open your personal link</h2>
+      <p class="help">To reply, use the link that Irfan and Aafia sent you. It opens your own invitation and saves your answer. If it does not work, please contact them directly.</p>
+    </section>
+
+    <section id="view-form" class="card" hidden>
+      <h2 id="form-title">Welcome</h2>
+      <p class="help" id="form-help">Please let us know if you can join us.</p>
+      <form id="rsvp-form" novalidate>
+        <div id="events"></div>
+        <label for="message">A message for us (optional)</label>
+        <textarea id="message" rows="4" maxlength="500" placeholder="Write a few words, if you like"></textarea>
+        <p id="form-error" class="error" role="alert" hidden></p>
+        <button type="submit" class="btn primary" id="send-btn">Send my reply</button>
+      </form>
+      <p class="deadline">You can change your answer until <strong id="deadline-2"></strong></p>
+    </section>
+
+    <section id="view-done" class="card" hidden>
+      <div class="heart" aria-hidden="true">&#10084;</div>
+      <h2 id="done-title">Thank you</h2>
+      <div id="done-summary"></div>
+      <div id="done-extra"></div>
+      <button type="button" class="btn secondary" id="change-btn">Change my answer</button>
+      <p class="deadline" id="done-note"></p>
+    </section>
+
+    <section id="view-closed" class="card" hidden>
+      <h2>Replies are now closed</h2>
+      <p class="help">Thank you for your interest. Please contact Irfan or Aafia directly.</p>
+    </section>
+
+    <section id="also-card" class="card also" hidden>
+      <h2></h2>
+      <p class="help">It has its own reply, so please answer there as well.</p>
+      <a class="btn secondary" href="#"></a>
+    </section>
+  </main>
+
+  <footer>
+    <p class="sign">With love, Irfan <span class="amp">&amp;</span> Aafia</p>
+  </footer>
+
+  <script src="config.js?v=9"></script>
+  <script src="app.js?v=9"></script>
+</body>
+</html>
