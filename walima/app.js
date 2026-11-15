@@ -78,8 +78,47 @@
   function eventById(id) { return CFG.events.filter(function (e) { return e.id === id; })[0]; }
 
   var firstShow = true;
+  // The question also sits on the picture itself, around the couple's feet, so it is not missed.
+  // Its two buttons press the same buttons as the reply card below, and "Reply below" scrolls there.
+  var quick = $("quick"), cue = document.querySelector("#film .cue");
+  function goTo(node) {
+    if (node) window.scrollTo({ top: Math.max(node.getBoundingClientRect().top + window.pageYOffset - 16, 0), behavior: "smooth" });
+  }
+  function goReply() {
+    var strip = $("both-events");
+    var card = VIEWS.map(function (v) { return $("view-" + v); }).filter(function (c) { return !c.hidden; })[0];
+    goTo(strip && !strip.hidden ? strip : card);
+  }
+  function heroState(name) {
+    if (quick) quick.hidden = name !== "form";
+    if (cue) {
+      cue.hidden = name === "form" || name === "loading";
+      cue.textContent = name === "done" ? "Your reply is saved" : "Reply below";
+    }
+  }
+  function syncQuick() {
+    if (!quick) return;
+    quick.querySelector(".yes").setAttribute("aria-pressed", choice === true ? "true" : "false");
+    quick.querySelector(".no").setAttribute("aria-pressed", choice === false ? "true" : "false");
+  }
+  function quickNote(text, cls) {
+    var more = quick && quick.querySelector(".quick-more");
+    if (more) { more.textContent = text; more.className = "quick-more" + (cls ? " " + cls : ""); }
+  }
+  if (cue) cue.addEventListener("click", goReply);
+  if (quick) {
+    ["yes", "no"].forEach(function (k) {
+      quick.querySelector("." + k).addEventListener("click", function () {
+        var b = document.querySelector("#events .answer ." + k);
+        if (b) b.click();
+      });
+    });
+    quick.querySelector(".quick-more").addEventListener("click", function () { goTo($("view-form")); });
+  }
+
   function show(name) {
     VIEWS.forEach(function (v) { $("view-" + v).hidden = v !== name; });
+    heroState(name);
     if (firstShow) { firstShow = false; return; } // the first screen opens at the top, under the invitation art
     var card = $("view-" + name), h = card.querySelector("h2");
     window.scrollTo({ top: Math.max(card.offsetTop - 16, 0), behavior: "smooth" });
@@ -345,7 +384,10 @@
     if (inFlight) { saveAgain = true; return; }
     saveAgain = false;
     var seq = ++saveSeq, note = $("save-note");
-    function say(text, cls) { if (note) { note.textContent = text; note.className = "save-note" + (cls ? " " + cls : ""); note.hidden = false; } }
+    function say(text, cls) {
+      if (note) { note.textContent = text; note.className = "save-note" + (cls ? " " + cls : ""); note.hidden = false; }
+      quickNote(cls === "is-saved" ? "Saved. Add a message" : (cls === "is-error" ? "Not saved. Reply below" : "Saving\u2026"), cls);
+    }
     function latest() { return seq === saveSeq && !saveAgain; }
     say("Saving\u2026");
     inFlight = api("submit", { code: code, people: buildPeople(), message: $("message").value.trim() }).then(function (r) {
@@ -442,7 +484,10 @@
     note.setAttribute("role", "status");
     wrap.appendChild(note);
 
+    quickNote("More below");
+
     function refresh() {
+      syncQuick();
       yes.setAttribute("aria-pressed", choice === true ? "true" : "false");
       no.setAttribute("aria-pressed", choice === false ? "true" : "false");
       if (!many) return;

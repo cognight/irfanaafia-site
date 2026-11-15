@@ -687,6 +687,43 @@ footer { text-align: center; padding: 26px 20px 60px; }
 .cue::after { content: "\2193"; display: inline-block; margin-left: .45em; animation: nudge 1.6s ease-in-out infinite; }
 .frame.is-card .cue { animation: fadeIn .9s ease-out calc(var(--d0, 0s) + 7.2s) both; }
 
+button.cue { border: 0; font-family: inherit; line-height: 1.5; cursor: pointer; }
+.cue[hidden] { display: none; }
+
+/* the question on the picture itself: a soft ivory haze around the couple's feet, with two buttons */
+.quick {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+  padding: 7cqw 5cqw 1.6cqw;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(255, 250, 244, 0) 0, rgba(255, 250, 244, .8) 30%, rgba(255, 250, 244, .95) 100%);
+  opacity: 0;
+}
+.quick[hidden] { display: none; }
+.quick-q { margin: 0 0 1.4cqw; font-family: "Lora", Georgia, serif; font-weight: 600; font-size: 4.4cqw; line-height: 1.2; color: var(--rose-deep); }
+.quick-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 2.4cqw; }
+.quick-btns button {
+  min-height: max(40px, 10.8cqw);
+  padding: 0 1cqw;
+  font: inherit; font-weight: 700; font-size: max(13px, 4.2cqw); line-height: 1.15;
+  color: var(--ink);
+  background: #FFFDF8;
+  border: 1px solid var(--gold);
+  border-radius: 3.6cqw;
+  box-shadow: inset 0 0 0 .6cqw #FFFDF8, inset 0 0 0 .8cqw rgba(194, 160, 99, .6), 0 .6cqw 2cqw rgba(80, 30, 45, .2);
+  cursor: pointer;
+}
+.quick-btns .yes[aria-pressed="true"] { background: var(--sage-deep); border-color: var(--sage-deep); color: #fff; box-shadow: inset 0 0 0 .6cqw var(--sage-deep), inset 0 0 0 .8cqw rgba(255, 255, 255, .55); }
+.quick-btns .yes[aria-pressed="true"]::before { content: "\2713\00a0"; }
+.quick-btns .no[aria-pressed="true"] { background: #6B5C5E; border-color: #6B5C5E; color: #fff; box-shadow: inset 0 0 0 .6cqw #6B5C5E, inset 0 0 0 .8cqw rgba(255, 255, 255, .5); }
+.quick-more { margin-top: .8cqw; padding: .8cqw 2cqw; background: none; border: 0; font: inherit; font-weight: 700; font-size: max(12px, 3.4cqw); line-height: 1.3; color: var(--rose-deep); cursor: pointer; }
+.quick-more::after { content: "\2193"; display: inline-block; margin-left: .4em; animation: nudge 1.6s ease-in-out infinite; }
+.quick-more.is-saved::before { content: "\2713\00a0"; }
+.frame.is-opening .quick { opacity: 0; pointer-events: none; }
+.frame.is-card .quick { animation: fadeIn .9s ease-out calc(var(--d0, 0s) + 5.2s) both; }
+.frame.is-seen .quick, .frame.is-still .quick { animation: none !important; opacity: 1; }
+.frame.is-still .quick-more::after { animation: none; }
+@media (prefers-reduced-motion: reduce) { .frame .quick { opacity: 1; animation: none; } }
+
 /* a small pill to skip the opening (a tap anywhere on the picture does the same) */
 .skip {
   position: absolute; right: 3%; top: 1.6%; z-index: 2;

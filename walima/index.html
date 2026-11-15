@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=Nunito+Sans:wght@400;600;700&family=Pinyon+Script&family=Aref+Ruqaa&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20">
+  <link rel="stylesheet" href="style.css?v=21">
 </head>
 <body>
   <header class="hero">
@@ -65,7 +65,16 @@
         <p class="when">Monday, January 11, 2027 &middot; 7:00 pm</p>
       </div>
 
-      <p class="cue" aria-hidden="true">Reply below</p>
+      <!-- the question, on the picture itself, around the couple's feet -->
+      <div class="quick" id="quick" hidden>
+        <p class="quick-q">Will you be joining us?</p>
+        <div class="quick-btns">
+          <button type="button" class="yes">Attending</button>
+          <button type="button" class="no">Not attending</button>
+        </div>
+        <button type="button" class="quick-more">More below</button>
+      </div>
+      <button type="button" class="cue">Reply below</button>
       <button type="button" class="replay" aria-label="Play the opening again">Play again</button>
 
       <!-- the opening scene: plays once, then fades into the invitation -->
@@ -139,7 +148,7 @@
     <p class="sign">With love, Irfan <span class="amp">&amp;</span> Aafia</p>
   </footer>
 
-  <script src="config.js?v=20"></script>
-  <script src="app.js?v=20"></script>
+  <script src="config.js?v=21"></script>
+  <script src="app.js?v=21"></script>
 </body>
 </html>
