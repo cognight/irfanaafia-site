@@ -358,9 +358,39 @@ details.cal .cal-links a {
 .pick button.no[aria-pressed="true"] { background: var(--rose-deep); color: #fff; border-color: var(--rose-deep); }
 .btn.all { margin: 4px 0 12px; min-height: 52px; font-size: 18px; }
 #view-done .summary .who-list { color: var(--muted); font-size: 17px; }
-.also { text-align: center; }
-.also h2 { padding: 0 34px; } /* keeps the words clear of the roses in the corner */
-.also .help { margin-bottom: 4px; }
+/* a family invited to both events sees them side by side, right under the picture */
+.both {
+  margin: 22px 0 0;
+  padding: 16px 14px 14px;
+  background: var(--card);
+  border: 1px solid var(--gold);
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 4px var(--card), inset 0 0 0 5px rgba(194, 160, 99, .6), 0 10px 28px rgba(110, 50, 65, .18);
+  text-align: center;
+}
+.both-title { margin: 0 0 12px; font-family: "Lora", Georgia, serif; font-weight: 600; font-size: 21px; line-height: 1.25; color: var(--rose-deep); }
+.both-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 6px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: #FBF3E6;
+  color: var(--ink);
+  text-decoration: none;
+}
+.tile b { font-family: "Lora", Georgia, serif; font-weight: 600; font-size: 22px; line-height: 1.2; color: var(--sage-deep); }
+.tile span { font-size: 17px; font-weight: 700; }
+.tile em { margin-top: 8px; padding: 6px 12px; border-radius: 999px; font-style: normal; font-weight: 700; font-size: 15px; line-height: 1.2; color: var(--muted); }
+a.tile { background: #fff; border-color: var(--gold); }
+a.tile em { background: var(--sage-deep); color: #fff; }
+/* after replying, a reminder that the other event needs its own reply */
+.next-event { margin: 18px 0 4px; padding: 16px 14px; background: #FBF3E6; border: 1px solid var(--line); border-radius: 16px; text-align: center; }
+.next-event p { margin: 0; font-weight: 700; }
+.next-event .btn { margin-top: 12px; }
 
 .heart { text-align: center; font-size: 34px; color: #A8303F; line-height: 1; margin-bottom: 8px; }
 #view-done h2 { text-align: center; }

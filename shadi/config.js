@@ -8,11 +8,17 @@ window.SITE = {
 
   deadlineText: "Sunday, December 13, 2026",
 
+  // The other event, shown to families who are invited to both. If the Walima date changes, change it here too.
+  otherEvents: {
+    walima: { name: "Walima", shortDate: "Mon, Jan 11", path: "/walima/", before: false }
+  },
+
   events: [
     {
       id: "nikkah",
       name: "Shadi",
       dateText: "Tuesday, January 5, 2027",
+      shortDate: "Tue, Jan 5",
       timeText: "",   // for example "2:00 pm"
       venue: "Venue to be announced",
       address: "",

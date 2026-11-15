@@ -5,7 +5,7 @@
   var EVENT = CFG.eventKey || CFG.events[0].id; // which event this page is for: "walima" or "nikkah"
   var $ = function (id) { return document.getElementById(id); };
   var VIEWS = ["loading", "lost", "form", "done", "closed"];
-  var OTHER = { walima: { name: "Walima", path: "/walima/" }, nikkah: { name: "Shadi", path: "/shadi/" } };
+  var OTHER = CFG.otherEvents || {}; // the other event's name, date and address, for families invited to both
 
   var code = "";        // the household's code from their link, for example rizwan-chacha
   var household = null; // { display, code, people: [{ id, name, ask, coming }], also }
@@ -179,14 +179,31 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit); else fit();
   }
 
-  // A family invited to both events gets a button to the other invitation.
+  // A family invited to both events sees both, side by side, right under the picture.
+  function otherLink() {
+    var o = OTHER[household.also];
+    return o ? o.path + "?i=" + encodeURIComponent(household.code || code) : "";
+  }
+
   function showAlso() {
-    var o = OTHER[household.also], box = $("also-card");
+    var o = OTHER[household.also], box = $("both-events"), here = eventById(EVENT);
     if (!o || !box) return;
-    box.querySelector("h2").textContent = "You are also invited to our " + o.name;
-    var a = box.querySelector("a");
-    a.href = o.path + "?i=" + encodeURIComponent(household.code || code);
-    a.textContent = "Open the " + o.name + " invitation";
+    function tile(tag, name, date, note) {
+      var t = el(tag, "tile");
+      t.appendChild(el("b", null, name));
+      t.appendChild(el("span", null, date));
+      t.appendChild(el("em", null, note));
+      return t;
+    }
+    var mine = tile("div", here.name, here.shortDate || here.dateText, "This invitation");
+    mine.className += " is-here";
+    var theirs = tile("a", o.name, o.shortDate || "", "Open invitation");
+    theirs.href = otherLink();
+    var tiles = box.querySelector(".both-tiles");
+    tiles.textContent = "";
+    // earliest event first
+    if (o.before) { tiles.appendChild(theirs); tiles.appendChild(mine); }
+    else { tiles.appendChild(mine); tiles.appendChild(theirs); }
     box.hidden = false;
   }
 
@@ -350,6 +367,17 @@
       sum.appendChild(line);
     }
     if (message) sum.appendChild(el("p", null, "Your message has been passed on to us."));
+
+    // invited to both events: remind them the other one needs its own reply
+    var other = OTHER[household.also];
+    if (other) {
+      var next = el("div", "next-event");
+      next.appendChild(el("p", null, "One more: you are also invited to our " + other.name + ". Please reply there too."));
+      var go = el("a", "btn primary", "Reply for the " + other.name);
+      go.href = otherLink();
+      next.appendChild(go);
+      extra.appendChild(next);
+    }
 
     $("change-btn").hidden = !open;
     $("done-note").textContent = open

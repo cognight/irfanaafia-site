@@ -9,11 +9,17 @@ window.SITE = {
 
   deadlineText: "Sunday, December 13, 2026",
 
+  // The other event, shown to families who are invited to both. If the Shadi date changes, change it here too.
+  otherEvents: {
+    nikkah: { name: "Shadi", shortDate: "Tue, Jan 5", path: "/shadi/", before: true }
+  },
+
   events: [
     {
       id: "walima",
       name: "Walima",
       dateText: "Monday, January 11, 2027",
+      shortDate: "Mon, Jan 11",
       timeText: "7:00 pm",
       venue: "Toronto Grand Convention Centre",
       address: "30 Baywood Rd, Etobicoke, ON M9V 2Z8",
