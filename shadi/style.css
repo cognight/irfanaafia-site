@@ -423,8 +423,17 @@ a.tile:active em { filter: brightness(.9); }
 
 /* the other invitation opens on top of this page and plays from its opening */
 html.has-overlay, html.has-overlay body { overflow: hidden; }
-.overlay { position: fixed; inset: 0; z-index: 50; background: #E3C2C3; animation: overlayIn .45s cubic-bezier(.2, .8, .2, 1) both; }
-.overlay iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+.overlay {
+  position: fixed; inset: 0; z-index: 50;
+  background: #E3C2C3;
+  visibility: hidden; opacity: 0; pointer-events: none;
+  transition: opacity .35s ease, visibility 0s linear .35s;
+}
+.overlay.is-open { visibility: visible; opacity: 1; pointer-events: auto; transition: opacity .35s ease; }
+/* shown only if the other invitation has not finished loading when it is asked for */
+.overlay-wait { position: absolute; left: 24px; right: 24px; top: 40%; margin: 0; text-align: center; font-family: "Lora", Georgia, serif; font-weight: 600; font-size: 21px; line-height: 1.35; color: #7E2944; }
+.overlay iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; opacity: 0; transition: opacity .4s ease; }
+.overlay.is-ready iframe { opacity: 1; }
 .overlay-close {
   position: absolute; left: 12px; top: calc(10px + env(safe-area-inset-top, 0px)); z-index: 1;
   min-height: 40px; padding: 0 1em 0 .8em;
@@ -434,8 +443,6 @@ html.has-overlay, html.has-overlay body { overflow: hidden; }
   color: var(--rose-deep); font: inherit; font-weight: 700; font-size: 14px; white-space: nowrap; cursor: pointer;
 }
 .overlay-close::before { content: "\2039"; margin-right: .45em; font-size: 1.25em; line-height: 1; }
-@keyframes overlayIn { from { opacity: 0; transform: translateY(5%); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .overlay { animation: none; } }
 /* after replying, a reminder that the other event needs its own reply */
 .next-event { margin: 18px 0 4px; padding: 16px 14px; background: #FBF3E6; border: 1px solid var(--line); border-radius: 16px; text-align: center; }
 .next-event p { margin: 0; font-weight: 700; }
@@ -502,6 +509,13 @@ h2.guest {
 .answer .no[aria-pressed="true"] { background: #6B5C5E; border-color: #6B5C5E; color: #fff; box-shadow: inset 0 0 0 3px #6B5C5E, inset 0 0 0 4px rgba(255, 255, 255, .5); }
 .some { display: block; margin: 12px auto 0; padding: 8px 10px; background: none; border: 0; font: inherit; font-size: 16px; color: var(--muted); text-decoration: underline; cursor: pointer; }
 .some[hidden], .people[hidden] { display: none; }
+
+/* a quiet line under the buttons: the answer is saved as soon as it is tapped */
+.save-note { margin: 12px 0 0; text-align: center; font-size: 16px; font-weight: 700; color: var(--muted); }
+.save-note[hidden] { display: none; }
+.save-note.is-saved { color: var(--sage-deep); }
+.save-note.is-saved::before { content: "\2713\00a0"; }
+.save-note.is-error { color: #6E2237; }
 .invite .people { margin-top: 4px; }
 .invite label { margin: 26px 0 10px; text-align: center; font-family: "Lora", Georgia, serif; font-weight: 600; font-size: 19px; color: var(--rose-deep); }
 .invite textarea { min-height: 96px; background: #FFFDF8; border: 1px solid var(--gold); border-radius: 16px; }

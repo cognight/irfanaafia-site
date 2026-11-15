@@ -207,43 +207,67 @@
     return o ? o.path + "?i=" + encodeURIComponent(household.code || code) + (embed ? "&embed=1" : "") : "";
   }
 
-  // The other invitation opens on top of this page and plays from its opening.
-  // Closing it (the Back pill, the phone's Back, or Esc) returns to this page as it was.
-  var overlay = null;
-  function openOther(e) {
+  // The other invitation is loaded quietly ahead of time, so when a guest asks for it, it opens
+  // at once and plays from its opening. Closing it (the Back pill, the phone's Back, or Esc)
+  // returns to this page as it was; opening it again replays the opening.
+  var overlay = null, overlayFrame = null, overlayOpen = false, overlayReady = false;
+
+  function tell(msg) {
+    try {
+      if (overlayFrame && overlayFrame.contentWindow) overlayFrame.contentWindow.postMessage(msg, window.location.origin);
+    } catch (err) {}
+  }
+
+  function prepareOther() {
     var o = OTHER[household.also];
-    if (!o) return;
-    if (e) e.preventDefault();
-    if (overlay) return;
+    if (!o || overlay || EMBED) return;
     overlay = el("div", "overlay");
     overlay.setAttribute("role", "dialog");
     overlay.setAttribute("aria-modal", "true");
     overlay.setAttribute("aria-label", o.name + " invitation");
-    var page = document.createElement("iframe");
-    page.src = otherLink(true);
-    page.title = o.name + " invitation";
-    page.setAttribute("allow", "autoplay");
-    overlay.appendChild(page);
+    overlay.appendChild(el("p", "overlay-wait", "Opening your " + o.name + " invitation\u2026"));
+    overlayFrame = document.createElement("iframe");
+    overlayFrame.src = otherLink(true) + "&wait=1";
+    overlayFrame.title = o.name + " invitation";
+    overlayFrame.setAttribute("allow", "autoplay");
+    overlayFrame.addEventListener("load", function () {
+      overlayReady = true;
+      overlay.classList.add("is-ready");
+      if (overlayOpen) tell("play-invitation");
+    });
+    overlay.appendChild(overlayFrame);
     var back = el("button", "overlay-close", "Back to the " + eventById(EVENT).name);
     back.type = "button";
     back.addEventListener("click", closeOther);
     overlay.appendChild(back);
     document.body.appendChild(overlay);
+  }
+
+  function openOther(e) {
+    var o = OTHER[household.also];
+    if (!o) return;
+    if (e) e.preventDefault();
+    if (overlayOpen) return;
+    prepareOther();
+    overlayOpen = true;
+    overlay.classList.add("is-open");
     document.documentElement.classList.add("has-overlay");
+    if (overlayReady) tell("play-invitation");
     try { history.pushState({ overlay: true }, ""); } catch (err) {}
   }
-  function removeOverlay() {
-    if (!overlay) return;
-    overlay.parentNode.removeChild(overlay);
-    overlay = null;
+  function hideOverlay() {
+    if (!overlayOpen) return;
+    overlayOpen = false;
+    overlay.classList.remove("is-open");
     document.documentElement.classList.remove("has-overlay");
+    tell("pause-invitation");
   }
   function closeOther() {
-    if (!overlay) return;
-    if (history.state && history.state.overlay) history.back(); // the Back handler below removes it
-    else removeOverlay();
+    if (!overlayOpen) return;
+    if (history.state && history.state.overlay) history.back(); // the Back handler below hides it
+    else hideOverlay();
   }
-  window.addEventListener("popstate", removeOverlay);
+  window.addEventListener("popstate", hideOverlay);
   window.addEventListener("keydown", function (e) { if (e.key === "Escape") closeOther(); });
   window.addEventListener("message", function (e) {
     if (e.origin === window.location.origin && e.data === "close-invitation") closeOther();
@@ -270,6 +294,7 @@
     if (o.before) { tiles.appendChild(theirs); tiles.appendChild(mine); }
     else { tiles.appendChild(mine); tiles.appendChild(theirs); }
     box.hidden = false;
+    setTimeout(prepareOther, 7000); // after this page's own opening has had a head start
   }
 
   function take(r) {
@@ -301,6 +326,32 @@
 
   var choice = null;  // true = attending, false = not attending, null = not chosen yet
   var custom = false; // true while the family is choosing person by person
+
+  // An answer is saved the moment it is tapped: nobody has to press "Send my reply" for it to count.
+  var saveTimer = null, saveSeq = 0;
+  function buildPeople() {
+    return draft.map(function (d) {
+      return { id: d.id, coming: choice === false ? false : (custom ? d.coming : true), name: custom ? d.name.trim() : "" };
+    });
+  }
+  function autosave() {
+    if (choice === null || !open) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () {
+      var seq = ++saveSeq, note = $("save-note");
+      function say(text, cls) { if (note) { note.textContent = text; note.className = "save-note" + (cls ? " " + cls : ""); note.hidden = false; } }
+      say("Saving\u2026");
+      api("submit", { code: code, people: buildPeople(), message: $("message").value.trim() }).then(function (r) {
+        if (seq !== saveSeq) return; // a newer answer is already on its way
+        if (!r.ok) { say(r.error === "closed" ? "Sorry, replies have closed." : "That did not save. Please tap Send my reply.", "is-error"); return; }
+        take(r);
+        say(choice ? "Saved. We look forward to seeing you." : "Saved. You will be missed.", "is-saved");
+      }).catch(function () {
+        if (seq === saveSeq) say("That did not save. Please check your internet and tap Send my reply.", "is-error");
+      });
+    }, 500);
+  }
+  $("message").addEventListener("change", autosave);
 
   function renderForm() {
     var ev = eventById(EVENT), people = household.people, many = people.length > 1;
@@ -349,6 +400,7 @@
           input.setAttribute("autocapitalize", "words");
           input.setAttribute("aria-label", "Name of guest " + (i + 1));
           input.addEventListener("input", function () { d.name = input.value; });
+          input.addEventListener("change", autosave);
           who.appendChild(input);
           li.appendChild(who);
         } else {
@@ -364,8 +416,8 @@
           a.setAttribute("aria-pressed", d.coming === true ? "true" : "false");
           b.setAttribute("aria-pressed", d.coming === false ? "true" : "false");
         }
-        a.addEventListener("click", function () { d.coming = true; paint(); });
-        b.addEventListener("click", function () { d.coming = false; paint(); });
+        a.addEventListener("click", function () { d.coming = true; paint(); autosave(); });
+        b.addEventListener("click", function () { d.coming = false; paint(); autosave(); });
         rows.push(paint);
         paint();
         pick.appendChild(a); pick.appendChild(b);
@@ -375,6 +427,12 @@
       wrap.appendChild(list);
     }
 
+    var note = el("p", "save-note");
+    note.id = "save-note";
+    note.hidden = true;
+    note.setAttribute("role", "status");
+    wrap.appendChild(note);
+
     function refresh() {
       yes.setAttribute("aria-pressed", choice === true ? "true" : "false");
       no.setAttribute("aria-pressed", choice === false ? "true" : "false");
@@ -383,8 +441,8 @@
       some.textContent = custom ? "All of us are coming" : "Only some of you? Choose who is coming";
       list.hidden = !(custom && choice !== false);
     }
-    yes.addEventListener("click", function () { choice = true; refresh(); });
-    no.addEventListener("click", function () { choice = false; custom = false; refresh(); });
+    yes.addEventListener("click", function () { choice = true; refresh(); autosave(); });
+    no.addEventListener("click", function () { choice = false; custom = false; refresh(); autosave(); });
     if (some) {
       some.addEventListener("click", function () {
         custom = !custom;
@@ -392,6 +450,7 @@
         if (!custom) draft.forEach(function (d) { d.coming = true; });
         rows.forEach(function (f) { f(); });
         refresh();
+        autosave();
       });
     }
     refresh();
@@ -401,9 +460,9 @@
     e.preventDefault();
     showError("form-error");
     if (choice === null) { showError("form-error", "Please tap Attending or Not attending."); return; }
-    var people = draft.map(function (d) {
-      return { id: d.id, coming: choice === false ? false : (custom ? d.coming : true), name: custom ? d.name.trim() : "" };
-    });
+    clearTimeout(saveTimer);
+    saveSeq++; // this full send replaces any quiet save still on its way
+    var people = buildPeople();
     var btn = $("send-btn");
     busy(btn, true, "Sending...");
     api("submit", { code: code, people: people, message: $("message").value.trim() }).then(function (r) {
@@ -543,7 +602,14 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
       startOpening();
     });
-    if (!showingCard) startOpening();
+    // Shown on top of the other invitation: wait on the first picture until asked to play.
+    var held = /[?&]wait=1(&|$)/.test(window.location.search);
+    window.addEventListener("message", function (e) {
+      if (e.origin !== window.location.origin) return;
+      if (e.data === "play-invitation") { window.scrollTo(0, 0); startOpening(); }
+      if (e.data === "pause-invitation") { opening.pause(); if (card.pause) card.pause(); }
+    });
+    if (!showingCard && !held) startOpening();
   }
 
   if (!("IntersectionObserver" in window)) {
