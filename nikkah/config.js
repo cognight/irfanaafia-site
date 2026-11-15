@@ -12,7 +12,7 @@ window.SITE = {
     {
       id: "nikkah",
       name: "Nikkah",
-      dateText: "Date to be announced",
+      dateText: "Tuesday, January 5, 2027",
       timeText: "",   // for example "2:00 pm"
       venue: "Venue to be announced",
       address: "",
