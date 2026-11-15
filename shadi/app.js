@@ -126,11 +126,14 @@
     return box;
   }
 
-  function eventCard(ev) {
+  // full = also show the event's name and date (the thank-you card); the reply card shows the venue only
+  function eventCard(ev, full) {
     var card = el("div", "event");
-    card.appendChild(el("h3", null, ev.heading || ev.name));
-    card.appendChild(dateBox(ev));
-    card.appendChild(el("p", "at", "at"));
+    if (full) {
+      card.appendChild(el("h3", null, ev.heading || ev.name));
+      card.appendChild(dateBox(ev));
+      card.appendChild(el("p", "at", "at"));
+    }
     var where = el("p", "where", ev.venue);
     if (ev.address) where.appendChild(el("small", null, ev.address));
     card.appendChild(where);
@@ -177,26 +180,25 @@
     });
   }
 
-  // Put the guest's name on the invitation: "Dear Rahman & Family".
+  // Write the family's name into the invitation's wording, under the Bismillah.
   function greet(name) {
-    var film = $("film");
-    var eyebrow = film && film.querySelector(".eyebrow"), lead = film && film.querySelector(".lead");
-    if (!eyebrow || !lead || !name) return;
-    var invite = lead.textContent; // "invite you to celebrate our"
-    eyebrow.textContent = "Dear " + String(name).replace(/^the\s+/i, "");
-    eyebrow.classList.add("is-name");
+    var film = $("film"), line = film && film.querySelector(".guest-line");
+    if (!line || !name) return;
+    line.textContent = String(name).replace(/^the\s+/i, "");
+    line.hidden = false;
     film.classList.add("has-name");
-    // add "together with our families" as an extra line, unless the name is long
-    // enough to need two lines itself (the words must stay clear of the couple)
-    lead.textContent = "";
-    lead.appendChild(document.createTextNode("together with our families"));
-    lead.appendChild(document.createElement("br"));
-    lead.appendChild(document.createTextNode(invite));
+    // the name stays on one line: it shrinks, if it has to, until it fits inside the arch
     function fit() {
-      var line = parseFloat(getComputedStyle(eyebrow).lineHeight) || 16;
-      if (eyebrow.offsetHeight > line * 1.6) lead.textContent = invite;
+      line.style.fontSize = "";
+      var px = parseFloat(getComputedStyle(line).fontSize) || 14, min = px * 0.6;
+      while (line.scrollWidth > line.clientWidth + 1 && px > min) {
+        px -= 0.25;
+        line.style.fontSize = px + "px";
+      }
     }
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit); else fit();
+    fit();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    window.addEventListener("resize", fit);
   }
 
   // A family invited to both events sees both, side by side, right under the picture.
@@ -442,7 +444,7 @@
         sum.appendChild(el("p", "who-list", "Coming: " + names(coming)));
         sum.appendChild(el("p", "who-list", "Not able to come: " + names(away)));
       }
-      extra.appendChild(eventCard(ev));
+      extra.appendChild(eventCard(ev, true));
     } else {
       line.textContent = "We are sorry you cannot make the " + ev.name + ". You will be missed.";
       sum.appendChild(line);
