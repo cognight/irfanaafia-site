@@ -738,6 +738,32 @@ button.cue { border: 0; font-family: inherit; line-height: 1.5; cursor: pointer;
 .skip::after { content: "\203A"; margin-left: .4em; font-size: 1.2em; line-height: 1; }
 .frame.is-opening .skip { animation: fadeIn .8s ease-out 1.6s both; }
 
+/* music: a round button to turn it on or off, and the first-touch prompt on the opening */
+.sound {
+  position: absolute; left: 3%; top: 1.6%; z-index: 4;
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; padding: 0;
+  border: 0; border-radius: 50%;
+  background: rgba(255, 250, 244, .72);
+  box-shadow: 0 2px 8px rgba(80, 30, 45, .16);
+  color: var(--rose-deep); cursor: pointer;
+}
+.sound[hidden] { display: none; }
+.sound[aria-pressed="true"] .off, .sound[aria-pressed="false"] .waves { display: none; }
+.tap-open {
+  position: absolute; left: 50%; bottom: 12%; z-index: 2; transform: translateX(-50%);
+  display: flex; align-items: center; min-height: 44px; padding: 0 1.5em;
+  border-radius: 999px;
+  background: rgba(255, 250, 244, .92);
+  box-shadow: 0 4px 16px rgba(80, 30, 45, .25);
+  color: var(--rose-deep); font-weight: 700; letter-spacing: .06em; white-space: nowrap; cursor: pointer;
+  font-size: 15px; font-size: max(15px, 4.2cqw);
+  opacity: 0; visibility: hidden;
+}
+.frame.is-waiting .tap-open { opacity: 1; visibility: visible; animation: tapPulse 1.8s ease-in-out .8s infinite; }
+.frame.is-waiting .skip { display: none; }
+@keyframes tapPulse { 50% { transform: translateX(-50%) scale(1.06); } }
+
 /* a small button to watch the opening again */
 .replay {
   position: absolute; right: 3%; top: 1.6%; z-index: 2;

@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=Nunito+Sans:wght@400;600;700&family=Pinyon+Script&family=Aref+Ruqaa&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="style.css?v=23">
 </head>
 <body>
   <header class="hero">
@@ -76,6 +76,7 @@
       </div>
       <button type="button" class="cue">Reply below</button>
       <button type="button" class="replay" aria-label="Play the opening again">Play again</button>
+      <button type="button" class="sound" aria-pressed="false" aria-label="Turn the music on"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5l4.5 3.8V5.7L7.5 9.5H4z" fill="currentColor" stroke="none"/><path class="waves" d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11"/><path class="off" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg></button>
 
       <!-- the opening scene: plays once, then fades into the invitation -->
       <div class="opening" aria-hidden="true">
@@ -84,6 +85,7 @@
         </video>
         <p class="monogram"><span class="mono-i">I</span><span class="mono-amp">&amp;</span><span class="mono-a">A</span></p>
         <span class="skip">Skip</span>
+        <span class="tap-open">Tap to open</span>
       </div>
 
     </div>
@@ -149,6 +151,6 @@
   </footer>
 
   <script src="config.js?v=22"></script>
-  <script src="app.js?v=22"></script>
+  <script src="app.js?v=23"></script>
 </body>
 </html>

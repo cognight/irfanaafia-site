@@ -251,6 +251,29 @@
   // returns to this page as it was; opening it again replays the opening.
   var overlay = null, overlayFrame = null, overlayOpen = false, overlayReady = false;
 
+  // the other invitation's music is played by this page (a phone only allows sound from the page that was touched)
+  var otherMusic = null;
+  function otherSound(play) {
+    var o = OTHER[household.also];
+    if (!o) return;
+    if (!otherMusic) { otherMusic = new Audio(o.path + "music-open.mp3?v=1"); otherMusic.preload = "auto"; }
+    otherMusic.pause();
+    if (!play) return;
+    var m = window.inviteMusic;
+    if (m && m.muted()) return;
+    if (m) m.stop();
+    try { otherMusic.currentTime = 0; } catch (err) {}
+    var p = otherMusic.play();
+    if (p && p.catch) p.catch(function () {});
+  }
+  // called inside the touch that opens it, so the phone lets the music start a moment later too
+  function unlockOtherSound() {
+    var m = window.inviteMusic;
+    if (!otherMusic || (m && m.muted())) return;
+    var p = otherMusic.play();
+    if (p && p.then) p.then(function () { if (!overlayReady) otherMusic.pause(); }).catch(function () {});
+  }
+
   function tell(msg) {
     try {
       if (overlayFrame && overlayFrame.contentWindow) overlayFrame.contentWindow.postMessage(msg, window.location.origin);
@@ -272,7 +295,7 @@
     overlayFrame.addEventListener("load", function () {
       overlayReady = true;
       overlay.classList.add("is-ready");
-      if (overlayOpen) tell("play-invitation");
+      if (overlayOpen) { tell("play-invitation"); otherSound(true); }
     });
     overlay.appendChild(overlayFrame);
     var back = el("button", "overlay-close", "Back to the " + eventById(EVENT).name);
@@ -280,6 +303,7 @@
     back.addEventListener("click", closeOther);
     overlay.appendChild(back);
     document.body.appendChild(overlay);
+    otherSound(false); // gets the music ready
   }
 
   function openOther(e) {
@@ -291,7 +315,8 @@
     overlayOpen = true;
     overlay.classList.add("is-open");
     document.documentElement.classList.add("has-overlay");
-    if (overlayReady) tell("play-invitation");
+    if (overlayReady) { tell("play-invitation"); otherSound(true); }
+    else unlockOtherSound();
     try { history.pushState({ overlay: true }, ""); } catch (err) {}
   }
   function hideOverlay() {
@@ -300,6 +325,7 @@
     overlay.classList.remove("is-open");
     document.documentElement.classList.remove("has-overlay");
     tell("pause-invitation");
+    otherSound(false);
   }
   function closeOther() {
     if (!overlayOpen) return;
@@ -612,6 +638,84 @@
   var showingCard = !frame.classList.contains("is-opening");
   var onScreen = true, timers = [];
 
+  // ---- music: a short piece that plays with the opening, then fades away by itself ----
+  // Phones only allow sound after a touch, so the page waits a moment on "Tap to open".
+  // If nobody touches, the opening plays without sound and the first touch brings the music in.
+  var EMBED = /[?&]embed=1(&|$)/.test(window.location.search); // on top of the other invitation, that page plays the music
+  var soundBtn = frame.querySelector(".sound");
+  var withOpening = null, plain = null, current = null;
+  var muted = false, waiting = false, waitTimer = null, resumeOnShow = false;
+
+  function musicOn() { return !!current && !current.paused && !current.ended; }
+  function paintSound() {
+    if (!soundBtn) return;
+    var on = musicOn();
+    soundBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    soundBtn.setAttribute("aria-label", on ? "Turn the music off" : "Turn the music on");
+  }
+  function track(src) {
+    var a = new Audio(src);
+    a.preload = "auto";
+    a.addEventListener("ended", paintSound);
+    a.addEventListener("pause", paintSound);
+    a.addEventListener("playing", paintSound);
+    return a;
+  }
+  function seek(a, t) {
+    if (a.readyState >= 1) { try { a.currentTime = t; } catch (e) {} return; }
+    a.addEventListener("loadedmetadata", function once() {
+      a.removeEventListener("loadedmetadata", once);
+      try { a.currentTime = t; } catch (e) {}
+    });
+  }
+  function stopMusic() { if (current) current.pause(); paintSound(); }
+  // at = seconds into the opening (the piece with the soft door sounds), or null for the music alone
+  function startMusic(at) {
+    if (EMBED || !withOpening) return;
+    if (current) current.pause();
+    current = at == null ? plain : withOpening;
+    seek(current, at || 0);
+    var p = current.play();
+    if (p && p.catch) p.catch(paintSound);
+    paintSound();
+  }
+  if (!EMBED) {
+    withOpening = track("music-open.mp3?v=1");
+    plain = track("music.mp3?v=1");
+    window.inviteMusic = { stop: stopMusic, muted: function () { return muted; } };
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) {
+        if (musicOn()) { resumeOnShow = true; current.pause(); }
+      } else if (resumeOnShow) {
+        resumeOnShow = false;
+        if (!muted && current) { var p = current.play(); if (p && p.catch) p.catch(paintSound); }
+      }
+    });
+  }
+  function begin(withSound) {
+    if (!waiting) return;
+    waiting = false;
+    clearTimeout(waitTimer);
+    frame.classList.remove("is-waiting");
+    startOpening();
+    if (withSound && !muted) startMusic(0);
+  }
+  if (soundBtn) {
+    if (EMBED) soundBtn.hidden = true;
+    soundBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (waiting) { begin(true); return; }
+      if (musicOn()) { muted = true; stopMusic(); return; }
+      muted = false;
+      if (!showingCard) startMusic(opening.currentTime);          // join the opening where it is
+      else if (current && current.paused && !current.ended && current.currentTime > 0) {
+        var p = current.play();                                   // carry on from where it was turned off
+        if (p && p.catch) p.catch(paintSound);
+      } else startMusic(null);
+    });
+    paintSound();
+  }
+
   function play(v) {
     if (!v.play) return Promise.resolve(); // the invitation is a still picture; the page moves it
     var p = v.play();
@@ -653,10 +757,15 @@
       if (!showingCard && opening.currentTime >= OPENING_SECONDS) showCard();
     });
     opening.addEventListener("ended", showCard);
-    frame.querySelector(".opening").addEventListener("click", showCard); // a tap skips ahead
+    frame.querySelector(".opening").addEventListener("click", function (e) {
+      if (waiting) { begin(true); return; }                              // the first touch opens it, with the music
+      if (e.target.closest && e.target.closest(".skip")) { showCard(); return; }
+      if (!musicOn() && !muted) startMusic(opening.currentTime);         // it opened by itself: a touch brings the music in
+    });
     if (replay) replay.addEventListener("click", function () {
       window.scrollTo({ top: 0, behavior: "smooth" });
       startOpening();
+      if (!muted) startMusic(0);
     });
     // Shown on top of the other invitation: wait on the first picture until asked to play.
     var held = /[?&]wait=1(&|$)/.test(window.location.search);
@@ -665,7 +774,15 @@
       if (e.data === "play-invitation") { window.scrollTo(0, 0); startOpening(); }
       if (e.data === "pause-invitation") { opening.pause(); if (card.pause) card.pause(); }
     });
-    if (!showingCard && !held) startOpening();
+    if (!showingCard && !held) {
+      if (EMBED) startOpening();
+      else {
+        // wait a moment for a touch, so the music can start together with the opening
+        waiting = true;
+        frame.classList.add("is-waiting");
+        waitTimer = setTimeout(function () { begin(false); }, 6000);
+      }
+    }
   }
 
   if (!("IntersectionObserver" in window)) {
