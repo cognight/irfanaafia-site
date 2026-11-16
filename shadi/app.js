@@ -663,7 +663,7 @@
     a.preload = "auto";
     a.addEventListener("ended", paintSound);
     a.addEventListener("pause", paintSound);
-    a.addEventListener("playing", paintSound);
+    a.addEventListener("playing", function () { everPlayed = true; paintSound(); });
     return a;
   }
   function seek(a, t) {
@@ -704,6 +704,48 @@
     frame.classList.remove("is-waiting");
     startOpening();
     if (withSound && !muted) startMusic(0);
+  }
+  // Start the music straight away, together with the opening. Many phones refuse sound before
+  // the first touch; only then does the page ask for one tap ("Tap to open"), so the music can
+  // still begin with the opening.
+  function startAtOnce() {
+    var decided = false, p = null;
+    function askForTap() {
+      if (decided) return;
+      decided = true;
+      waiting = true;
+      frame.classList.add("is-waiting");
+      waitTimer = setTimeout(function () { begin(false); }, 6000);
+    }
+    try { current = withOpening; p = current.play(); } catch (e) {}
+    if (!p || !p.then) { askForTap(); return; }
+    var slow = setTimeout(function () { // the music is slow to arrive: do not hold the opening for it
+      if (decided) return;
+      decided = true;
+      startOpening();
+    }, 2500);
+    p.then(function () {
+      clearTimeout(slow);
+      if (!decided) { decided = true; startOpening(); }
+      else if (muted) current.pause();
+      else if (showingCard) startMusic(null);
+      else seek(current, opening.currentTime);
+      paintSound();
+    }, function () {
+      clearTimeout(slow);
+      askForTap();
+      paintSound();
+    });
+  }
+  // If the opening had to begin without sound, the first tap anywhere on the page brings the music in.
+  var loadedAt = Date.now(), everPlayed = false;
+  if (!EMBED) {
+    document.addEventListener("click", function () {
+      if (waiting || muted || everPlayed || musicOn()) return;
+      if (Date.now() - loadedAt > 45000) return;
+      if (document.documentElement.classList.contains("has-overlay")) return;
+      startMusic(showingCard ? null : opening.currentTime);
+    });
   }
   if (soundBtn) {
     if (EMBED) soundBtn.hidden = true;
@@ -790,12 +832,7 @@
     });
     if (!showingCard && !held) {
       if (EMBED) startOpening();
-      else {
-        // wait a moment for a touch, so the music can start together with the opening
-        waiting = true;
-        frame.classList.add("is-waiting");
-        waitTimer = setTimeout(function () { begin(false); }, 6000);
-      }
+      else startAtOnce();
     }
   }
 
