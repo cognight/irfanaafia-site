@@ -76,82 +76,75 @@ body {
 .bism {
   font-family: "Bismillah", "Scheherazade New", serif;
   font-weight: 700;
-  font-size: 10.8cqw;
-  line-height: 1;
+  font-size: 9.2cqw;
+  line-height: 1.04;
   color: #6B4A0F;
 }
 
 .frame .text .hosts {
-  margin-top: 1.4cqw;
-  font-family: "Lora", Georgia, serif;
-  font-weight: 700;
-  font-size: 4.5cqw;
+  margin-top: 1.6cqw;
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  font-size: 3.75cqw;
   line-height: 1.2;
-  letter-spacing: .02em;
+  letter-spacing: .035em;
   color: #7E1326;
 }
 .request, .daughter {
   font-family: "Playfair Display", Georgia, serif;
   font-style: italic;
   font-weight: 500;
-  font-size: 3.4cqw;
-  line-height: 1.2;
+  font-size: 3.15cqw;
+  line-height: 1.25;
   color: #2E211F;
   white-space: nowrap;
 }
-.occasion {
-  display: inline-block;
-  margin: 0 .12em;
-  font-family: "Lora", Georgia, serif;
-  font-style: normal;
-  font-weight: 700;
-  font-size: 4.5cqw;
-  line-height: 1.05;
-  letter-spacing: .03em;
-  color: #7E1326;
-}
+.frame .text .request { margin-top: .3cqw; }
+/* the name of the event reads as part of the sentence, in the same lettering */
+.occasion { font: inherit; color: inherit; letter-spacing: inherit; }
 
 .names {
-  margin: .4cqw 0 0;
+  margin: 1cqw 0 0;
   font-family: "Pinyon Script", "Snell Roundhand", cursive;
   font-weight: 400;
-  font-size: 8.2cqw;
+  font-size: 9.2cqw;
   line-height: 1.02;
   white-space: nowrap;
   color: #7E1326;
   /* the script has fine hairlines: a hair of the same red fills them in so they read on a phone */
-  -webkit-text-stroke: .07cqw #7E1326;
+  -webkit-text-stroke: .1cqw #7E1326;
 }
 .names .n1, .names .n2, .names .amp { display: block; }
-.names .n1, .names .n2 { padding: .06em 0; }
+.names .n1, .names .n2 { padding: .02em 0; }
 .names .amp {
   font-family: "Playfair Display", Georgia, serif;
   font-style: italic;
   font-weight: 500;
-  font-size: .38em;
-  line-height: 1.05;
-  color: #6B4A0F;
+  font-size: 3.1cqw;
+  line-height: 1.1;
+  color: #8A6418;
   -webkit-text-stroke: 0;
 }
-.daughter { font-size: 3.1cqw; }
+.frame .text .daughter { margin-top: .2cqw; font-weight: 400; font-size: 2.8cqw; }
 
-/* the day and the time, under a fine gold line: the part people look for */
+/* the day and the time, under a fine gold line */
 .frame .text .when {
   position: relative;
-  margin-top: 1.1cqw;
-  padding-top: 1.2cqw;
+  margin-top: 1.5cqw;
+  padding-top: 1.5cqw;
+  font-family: "Playfair Display", Georgia, serif;
   color: #2A1C1A;
   white-space: nowrap;
 }
 .when .date, .when .time { display: block; }
-.when .date { font-weight: 800; font-size: 3.55cqw; line-height: 1.2; letter-spacing: .01em; }
-.when .time { font-weight: 700; font-size: 3.15cqw; line-height: 1.2; color: #7E1326; }
+.when .date { font-weight: 600; font-size: 3.5cqw; line-height: 1.2; letter-spacing: .05em; font-variant-numeric: lining-nums; }
+.when .time { margin-top: .2cqw; font-weight: 500; font-size: 2.9cqw; line-height: 1.2; letter-spacing: .04em; color: #7E1326; font-variant-numeric: lining-nums; }
 .when::before {
   content: "";
   position: absolute;
   left: 50%;
   top: 0;
-  width: 30cqw;
+  width: 26cqw;
   height: 1px;
   transform: translateX(-50%);
   background: linear-gradient(90deg, transparent, #A8842F 25%, #A8842F 75%, transparent);
@@ -165,7 +158,7 @@ body {
   padding: 0 1.2cqw .4cqw;
   font-family: "Lora", Georgia, serif;
   font-weight: 600;
-  font-size: 3.6cqw;
+  font-size: 3.35cqw;
   line-height: 1.2;
   color: #2A1C1A;
   white-space: nowrap;
@@ -174,10 +167,11 @@ body {
 }
 .guest-line[hidden] { display: none; }
 /* with the name line in, the lines below tighten a little so everything still clears the couple */
-.frame.has-name .names { font-size: 7.1cqw; }
-.frame.has-name .text .hosts { margin-top: .5cqw; }
+.frame.has-name .names { margin-top: .6cqw; font-size: 8.4cqw; }
+.frame.has-name .text .guest-line { margin-top: .7cqw; }
+.frame.has-name .text .hosts { margin-top: 1cqw; }
 .frame.has-name .daughter { line-height: 1.15; }
-.frame.has-name .text .when { margin-top: .6cqw; padding-top: .7cqw; }
+.frame.has-name .text .when { margin-top: 1cqw; padding-top: 1cqw; }
 
 /* a heading for screen readers only */
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
