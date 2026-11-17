@@ -20,11 +20,19 @@
   function api(action, payload) {
     if (!CFG.apiUrl) return demoApi(action, payload);
     var body = JSON.stringify(Object.assign({ action: action, event: EVENT }, payload));
-    // No Content-Type header on purpose: it keeps this a "simple" request that Google accepts from any page.
-    return fetch(CFG.apiUrl, { method: "POST", body: body }).then(function (r) {
-      if (!r.ok) throw new Error("bad status");
-      return r.json();
-    });
+    // A phone on a weak signal can miss the first try, so opening an invitation is tried up to three times.
+    var tries = action === "get" ? 3 : 1;
+    function attempt(n) {
+      // No Content-Type header on purpose: it keeps this a "simple" request that Google accepts from any page.
+      return fetch(CFG.apiUrl, { method: "POST", body: body }).then(function (r) {
+        if (!r.ok) throw new Error("bad status");
+        return r.json();
+      }).catch(function (err) {
+        if (n >= tries) throw err;
+        return new Promise(function (go) { setTimeout(go, 1500 * n); }).then(function () { return attempt(n + 1); });
+      });
+    }
+    return attempt(1);
   }
 
   // Sample guests, only used while apiUrl is empty (preview). An empty name is a guest whose name we do not have yet.
@@ -492,7 +500,13 @@
       else { renderForm(); show("form"); }
     }).catch(function () {
       $("view-lost").querySelector("h2").textContent = "We could not reach the server";
-      $("view-lost").querySelector("p").textContent = "Please check your internet connection and reload this page.";
+      $("view-lost").querySelector("p").textContent = "Please check your internet connection and try again.";
+      if (!$("view-lost").querySelector(".retry")) {
+        var again = el("button", "btn primary retry", "Try again");
+        again.type = "button";
+        again.addEventListener("click", function () { window.location.reload(); });
+        $("view-lost").appendChild(again);
+      }
       show("lost");
     });
   }
