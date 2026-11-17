@@ -47,6 +47,11 @@ body {
   .hero { padding: 16px 14px 0; }
   .frame { max-width: 440px; border-radius: 26px; }
 }
+/* The still pictures also sit behind the two videos. A phone only starts fetching a video when it is
+   asked to play, and shows nothing until the first frame arrives, so without these the invitation
+   went dark for a few seconds. */
+.frame video.scene-card { background: #2A0C12 url("invite.jpg?v=4") center / cover no-repeat; }
+.frame video.scene-open { background: #2A0C12 url("doors.jpg?v=4") center / cover no-repeat; }
 /* the animated card: a looping video, with a still picture shown until it loads */
 .frame .art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; pointer-events: none; }
 

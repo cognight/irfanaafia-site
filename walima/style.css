@@ -49,6 +49,9 @@ body {
 }
 /* the animated card: a looping video, with a still picture shown until it loads */
 .frame .art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; pointer-events: none; }
+/* The still picture also sits behind the opening video. A phone only starts fetching the video when it
+   is asked to play, and shows nothing until the first frame arrives. */
+.frame video.scene-open { background: url("scene1.jpg?v=9") center / cover no-repeat; }
 
 /* The words sit on the plain panel inside the arch, above the couple.
    Every size here is in cqw (1cqw = 1% of the picture's width), so the words keep

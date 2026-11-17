@@ -789,8 +789,10 @@
     play(opening).then(function () {
       if (!showingCard) frame.classList.add("is-pushing"); // the camera starts to glide in
     }).catch(showCard); // phones that will not play video go straight to the invitation
-    timers.push(setTimeout(function () { if (opening.currentTime < 0.2) showCard(); }, 4000)); // slow connection
-    timers.push(setTimeout(showCard, 12000));
+    // A phone only starts fetching the opening when it is asked to play, so it gets time to arrive
+    // (its still picture shows meanwhile) before the page gives up and goes to the invitation.
+    timers.push(setTimeout(function () { if (opening.currentTime < 0.2) showCard(); }, 12000)); // slow connection
+    timers.push(setTimeout(showCard, 24000));
   }
 
   if (!still) {
