@@ -750,9 +750,10 @@ button.cue { border: 0; font-family: inherit; line-height: 1.5; cursor: pointer;
   position: absolute; left: 50%; bottom: 12%; z-index: 2; transform: translateX(-50%);
   display: flex; align-items: center; min-height: 44px; padding: 0 1.5em;
   border-radius: 999px;
-  background: rgba(255, 250, 244, .92);
-  box-shadow: 0 4px 16px rgba(80, 30, 45, .25);
-  color: var(--rose-deep); font-weight: 700; letter-spacing: .06em; white-space: nowrap; cursor: pointer;
+  background: var(--rose-deep);
+  border: 1px solid var(--gold);
+  box-shadow: 0 4px 16px rgba(40, 10, 20, .4);
+  color: #fff; font-weight: 700; letter-spacing: .06em; white-space: nowrap; cursor: pointer;
   font-size: 15px; font-size: max(15px, 4.2cqw);
   opacity: 0; visibility: hidden;
 }

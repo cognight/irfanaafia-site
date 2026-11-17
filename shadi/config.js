@@ -8,6 +8,10 @@ window.SITE = {
 
   deadlineText: "Sunday, December 13, 2026",
 
+  // The plain link with no family code (irfanaafia.com/shadi) also takes a reply: the guest types a
+  // name and how many are coming. These land in the planner's "Open replies" tab. Set to false to turn it off.
+  openReplies: true,
+
   // The other event, shown to families who are invited to both. If the Walima date changes, change it here too.
   otherEvents: {
     walima: { name: "Walima", shortDate: "Mon, Jan 11", path: "/walima/", before: false }

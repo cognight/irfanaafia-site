@@ -4,7 +4,7 @@
   var CFG = window.SITE;
   var EVENT = CFG.eventKey || CFG.events[0].id; // which event this page is for: "walima" or "nikkah"
   var $ = function (id) { return document.getElementById(id); };
-  var VIEWS = ["loading", "lost", "form", "done", "closed"];
+  var VIEWS = ["loading", "lost", "open", "opendone", "form", "done", "closed"];
   var OTHER = CFG.otherEvents || {}; // the other event's name, date and address, for families invited to both
   var EMBED = /[?&]embed=1(&|$)/.test(window.location.search); // true when this page is showing on top of the other invitation
 
@@ -93,7 +93,7 @@
     if (quick) quick.hidden = name !== "form";
     if (cue) {
       cue.hidden = name === "form" || name === "loading";
-      cue.textContent = name === "done" ? "Your reply is saved" : "Reply below";
+      cue.textContent = (name === "done" || name === "opendone") ? "Your reply is saved" : "Reply below";
     }
   }
   function syncQuick() {
@@ -369,7 +369,117 @@
     open = r.open;
   }
 
+  // ---------- the general invitation: a reply with no personal link ----------
+  // Only when the link has no "?i=" at all. The guest types a name and how many are coming; the
+  // reply is kept under a random id on this phone, so answering again changes the same line.
+
+  var OPEN_STORE = "openReply-" + EVENT, openMem = null, openIdMem = "";
+  var openChoice = null, openCount = 1, OPEN_MAX = 15;
+  function openSaved() {
+    try { return JSON.parse(localStorage.getItem(OPEN_STORE) || "null") || openMem; } catch (e) { return openMem; }
+  }
+  function openKeep(s) {
+    openMem = s;
+    try { localStorage.setItem(OPEN_STORE, JSON.stringify(s)); } catch (e) {}
+  }
+  function openId() {
+    var id = "";
+    try { id = localStorage.getItem("openReplyId") || ""; } catch (e) {}
+    if (!/^[A-Za-z0-9]{16,40}$/.test(id)) id = openIdMem;
+    if (!id) {
+      var abc = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789", box = new Uint8Array(24);
+      if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(box);
+      else for (var i = 0; i < box.length; i++) box[i] = Math.floor(Math.random() * 256);
+      for (var j = 0; j < box.length; j++) id += abc.charAt(box[j] % abc.length);
+      openIdMem = id;
+      try { localStorage.setItem("openReplyId", id); } catch (e) {}
+    }
+    return id;
+  }
+  function openPaint() {
+    var a = $("view-open").querySelector(".open-answer");
+    a.querySelector(".yes").setAttribute("aria-pressed", openChoice === true ? "true" : "false");
+    a.querySelector(".no").setAttribute("aria-pressed", openChoice === false ? "true" : "false");
+    $("open-count-row").hidden = openChoice !== true;
+    $("open-count").textContent = String(openCount);
+    $("view-open").querySelector(".minus").disabled = openCount <= 1;
+    $("view-open").querySelector(".plus").disabled = openCount >= OPEN_MAX;
+  }
+  function renderOpen(s) {
+    var wrap = $("open-event");
+    wrap.textContent = "";
+    wrap.appendChild(eventCard(eventById(EVENT)));
+    $("open-name").value = s ? s.name : "";
+    $("open-message").value = s ? (s.message || "") : "";
+    openChoice = s ? s.coming : null;
+    openCount = s && s.coming && s.count ? s.count : 1;
+    showError("open-error");
+    openPaint();
+  }
+  function renderOpenDone(s) {
+    var ev = eventById(EVENT), sum = $("open-done-summary"), extra = $("open-done-extra");
+    $("open-done-title").textContent = s.name;
+    sum.textContent = ""; extra.textContent = "";
+    var line = el("p");
+    if (s.coming) {
+      line.appendChild(document.createTextNode("We will see you at the " + ev.name + ": "));
+      line.appendChild(el("strong", null, s.count + (s.count === 1 ? " guest" : " guests")));
+      line.appendChild(document.createTextNode("."));
+      sum.appendChild(line);
+      extra.appendChild(eventCard(ev, true));
+    } else {
+      line.textContent = "We are sorry you cannot make the " + ev.name + ". You will be missed.";
+      sum.appendChild(line);
+    }
+    if (s.message) sum.appendChild(el("p", null, "Your message has been passed on to us."));
+  }
+  function startOpen() {
+    $("deadline-3").textContent = CFG.deadlineText;
+    $("deadline-4").textContent = CFG.deadlineText;
+    var view = $("view-open"), form = $("open-form"), sending = false;
+    view.querySelector(".open-answer .yes").addEventListener("click", function () { openChoice = true; showError("open-error"); openPaint(); });
+    view.querySelector(".open-answer .no").addEventListener("click", function () { openChoice = false; showError("open-error"); openPaint(); });
+    view.querySelector(".minus").addEventListener("click", function () { if (openCount > 1) openCount--; openPaint(); });
+    view.querySelector(".plus").addEventListener("click", function () { if (openCount < OPEN_MAX) openCount++; openPaint(); });
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (sending) return;
+      var name = $("open-name").value.replace(/\s+/g, " ").trim();
+      if (name.length < 2) { showError("open-error", "Please type your name."); $("open-name").focus(); return; }
+      if (openChoice === null) { showError("open-error", "Please choose Attending or Not attending."); return; }
+      showError("open-error");
+      var btn = $("open-send"), reply = { name: name, coming: openChoice, count: openChoice ? openCount : 0, message: $("open-message").value.trim() };
+      sending = true;
+      busy(btn, true, "Sending\u2026");
+      api("open", { id: openId(), name: reply.name, coming: reply.coming, count: reply.count, message: reply.message }).then(function (r) {
+        sending = false;
+        busy(btn, false, "Send my reply");
+        if (r && r.ok) {
+          reply.name = r.name || reply.name;
+          openKeep(reply);
+          renderOpenDone(reply);
+          show("opendone");
+        } else if (r && r.error === "closed") {
+          show("closed");
+        } else {
+          showError("open-error", "We could not save your reply. Please try again, or contact Irfan or Aafia directly.");
+        }
+      }).catch(function () {
+        sending = false;
+        busy(btn, false, "Send my reply");
+        showError("open-error", NETWORK_MSG);
+      });
+    });
+    $("open-change").addEventListener("click", function () { renderOpen(openSaved()); show("open"); });
+
+    if (Date.now() >= DEADLINE) { show("closed"); return; }
+    var s = openSaved();
+    if (s && typeof s.coming === "boolean" && s.name) { renderOpenDone(s); show("opendone"); }
+    else { renderOpen(null); show("open"); }
+  }
+
   function start() {
+    if (CFG.openReplies && CFG.apiUrl && !new URLSearchParams(window.location.search).has("i")) { startOpen(); return; }
     code = (new URLSearchParams(window.location.search).get("i") || "").trim();
     if (!/^[A-Za-z0-9][A-Za-z0-9 _-]{1,39}$/.test(code)) { show("lost"); return; }
     api("get", { code: code }).then(function (r) {
@@ -644,7 +754,7 @@
   var onScreen = true, timers = [];
 
   // ---- music: a short piece that plays with the opening, then fades away by itself ----
-  // Phones only allow sound after a touch, so the page waits a moment on "Tap to open".
+  // Phones only allow sound after a touch, so the page waits on a small "Click to open" button.
   // If nobody touches, the opening plays without sound and the first touch brings the music in.
   var EMBED = /[?&]embed=1(&|$)/.test(window.location.search); // on top of the other invitation, that page plays the music
   var soundBtn = frame.querySelector(".sound");
@@ -706,16 +816,15 @@
     if (withSound && !muted) startMusic(0);
   }
   // Start the music straight away, together with the opening. Many phones refuse sound before
-  // the first touch; only then does the page ask for one tap ("Tap to open"), so the music can
-  // still begin with the opening.
+  // the first touch; only then does the page show a small "Click to open" button and wait for it,
+  // so the music always begins with the opening.
   function startAtOnce() {
     var decided = false, p = null;
     function askForTap() {
       if (decided) return;
       decided = true;
       waiting = true;
-      frame.classList.add("is-waiting");
-      waitTimer = setTimeout(function () { begin(false); }, 6000);
+      frame.classList.add("is-waiting"); // it now waits for the click, so the music always starts with the opening
     }
     try { current = withOpening; p = current.play(); } catch (e) {}
     if (!p || !p.then) { askForTap(); return; }

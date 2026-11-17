@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Nunito+Sans:wght@400;600;700;800&family=Pinyon+Script&family=Playfair+Display:ital,wght@0,500;0,600;1,400;1,500;1,600&display=swap" rel="stylesheet">
   <link rel="preload" href="bismillah.woff2?v=1" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="style.css?v=21">
+  <link rel="stylesheet" href="style.css?v=22">
 </head>
 <body>
   <header class="hero">
@@ -70,7 +70,7 @@
         </video>
         <p class="monogram"><span class="mono-i">I</span><span class="mono-amp">&amp;</span><span class="mono-a">A</span></p>
         <span class="skip">Skip</span>
-        <span class="tap-open">Tap to open</span>
+        <span class="tap-open">Click to open</span>
       </div>
     </div>
     <script>
@@ -100,6 +100,44 @@
     <section id="view-lost" class="card" hidden>
       <h2>Please open your personal link</h2>
       <p class="help">To reply, use the link that Irfan and Aafia sent you. It opens your own invitation and saves your answer. If it does not work, please contact them directly.</p>
+    </section>
+
+    <!-- the general invitation (no personal link): the guest types a name and how many are coming -->
+    <section id="view-open" class="card invite" hidden>
+      <h2 class="sr-only">Your reply</h2>
+      <form id="open-form" novalidate>
+        <div id="open-event"></div>
+        <p class="q">Will you be joining us?</p>
+        <label for="open-name">Your name</label>
+        <input type="text" id="open-name" maxlength="40" autocomplete="name" autocapitalize="words" placeholder="Your name or family name">
+        <div class="answer open-answer">
+          <button type="button" class="yes" aria-pressed="false">Attending</button>
+          <button type="button" class="no" aria-pressed="false">Not attending</button>
+        </div>
+        <div id="open-count-row" class="count-row" hidden>
+          <p class="q" id="open-count-label">How many of you are coming?</p>
+          <div class="stepper" role="group" aria-labelledby="open-count-label">
+            <button type="button" class="minus" aria-label="One fewer">&minus;</button>
+            <output id="open-count" aria-live="polite">1</output>
+            <button type="button" class="plus" aria-label="One more">+</button>
+          </div>
+        </div>
+        <label for="open-message">A message for us (optional)</label>
+        <textarea id="open-message" rows="3" maxlength="500" placeholder="Write a few words, if you like"></textarea>
+        <p id="open-error" class="error" role="alert" hidden></p>
+        <button type="submit" class="btn primary" id="open-send">Send my reply</button>
+      </form>
+      <p class="deadline">You can change your answer until <strong id="deadline-3"></strong></p>
+    </section>
+
+    <section id="view-opendone" class="card invite" hidden>
+      <div class="heart" aria-hidden="true">&#10084;</div>
+      <p class="for">Thank you</p>
+      <h2 id="open-done-title"></h2>
+      <div id="open-done-summary" class="summary"></div>
+      <div id="open-done-extra"></div>
+      <button type="button" class="btn secondary" id="open-change">Change my answer</button>
+      <p class="deadline">You can change your answer until <strong id="deadline-4"></strong></p>
     </section>
 
     <section id="view-form" class="card invite" hidden>
@@ -134,7 +172,7 @@
     <p class="sign">With love, Irfan <span class="amp">&amp;</span> Aafia</p>
   </footer>
 
-  <script src="config.js?v=18"></script>
-  <script src="app.js?v=20"></script>
+  <script src="config.js?v=19"></script>
+  <script src="app.js?v=21"></script>
 </body>
 </html>

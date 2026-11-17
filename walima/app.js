@@ -639,7 +639,7 @@
   var onScreen = true, timers = [];
 
   // ---- music: a short piece that plays with the opening, then fades away by itself ----
-  // Phones only allow sound after a touch, so the page waits a moment on "Tap to open".
+  // Phones only allow sound after a touch, so the page waits on a small "Click to open" button.
   // If nobody touches, the opening plays without sound and the first touch brings the music in.
   var EMBED = /[?&]embed=1(&|$)/.test(window.location.search); // on top of the other invitation, that page plays the music
   var soundBtn = frame.querySelector(".sound");
@@ -701,16 +701,15 @@
     if (withSound && !muted) startMusic(0);
   }
   // Start the music straight away, together with the opening. Many phones refuse sound before
-  // the first touch; only then does the page ask for one tap ("Tap to open"), so the music can
-  // still begin with the opening.
+  // the first touch; only then does the page show a small "Click to open" button and wait for it,
+  // so the music always begins with the opening.
   function startAtOnce() {
     var decided = false, p = null;
     function askForTap() {
       if (decided) return;
       decided = true;
       waiting = true;
-      frame.classList.add("is-waiting");
-      waitTimer = setTimeout(function () { begin(false); }, 6000);
+      frame.classList.add("is-waiting"); // it now waits for the click, so the music always starts with the opening
     }
     try { current = withOpening; p = current.play(); } catch (e) {}
     if (!p || !p.then) { askForTap(); return; }
